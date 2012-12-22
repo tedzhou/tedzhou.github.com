@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="./js/lib/zepto.js"></script>
+    <script type="text/javascript" src="./js/lib/tutil.js"></script>
+</head>
+<body>
+
+
+<h1>zepto</h1>
+<div id = "zepto">
+
+    <h2>Href</h2>
+    <a href="javascript:;" style="font-size:10px;">10</a>
+    <hr>
+    <a href="javascript:;" style="font-size:12px;">12</a>
+    <hr>
+    <a href="javascript:;" style="font-size:14px;">14</a>
+    <hr>
+    <a href="javascript:;" style="font-size:16px;">16</a>
+
+
+    <hr>
+    <hr>
+
+    <h2>NO Href</h2>
+    <a  style="font-size:10px;">10</a>
+    <hr>
+    <a  style="font-size:12px;">12</a>
+    <hr>
+    <a  style="font-size:14px;">14</a>
+    <hr>
+    <a  style="font-size:16px;">16</a>
+
+</div>
+
+<h1>tutil</h1>
+<div id = "tutil">
+
+    <h2>Href</h2>
+    <a href="javascript:;" style="font-size:10px;">10</a>
+    <hr>
+    <a href="javascript:;" style="font-size:12px;">12</a>
+    <hr>
+    <a href="javascript:;" style="font-size:14px;">14</a>
+    <hr>
+    <a href="javascript:;" style="font-size:16px;">16</a>
+
+
+    <hr>
+    <hr>
+
+    <h2>NO Href</h2>
+    <a  style="font-size:10px;">10</a>
+    <hr>
+    <a  style="font-size:12px;">12</a>
+    <hr>
+    <a  style="font-size:14px;">14</a>
+    <hr>
+    <a  style="font-size:16px;">16</a>
+</div>
+<script>
+    var zep = document.getElementById('zepto');
+    var tut = document.getElementById('tutil');
+
+    Zepto(zep).delegate('a', 'tap', function (e) {
+        alert('ok')
+    });
+    TUtil.event.delegate(tut, 'a','tap',function(){
+        alert('ok');
+    });
+</script>
+</body>
+</html>
