@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mobile， hole | Tedz]]></title>
   <link href="http://tedzhou.github.com/blog/categories/mobile-hole/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
-  <updated>2012-12-22T20:14:24+08:00</updated>
+  <updated>2012-12-22T20:22:45+08:00</updated>
   <id>http://tedzhou.github.com/</id>
   <author>
     <name><![CDATA[tedzhou]]></name>
@@ -36,9 +36,9 @@
 <p>考虑到这些研究比较白痴，无非就是一些排列组合，所以直接给出结论:</p>
 
 <ol>
-<li>可点击区域小的时候， <code>touch</code>不一定会触发， 但<code>click</code>一定会触发， <code>href</code>也会触发。(a标签高亮了是因为href)。</li>
-<li>事件触发顺序是touch->click->href</li>
-<li>"命中率"来说， href==click > touchstart -> "tap"</li>
+<li>可点击区域小的时候， <code>touch</code> 不一定会触发， 但<code>click</code> 一定会触发， <code>href</code> 也会触发。(a标签高亮了是因为href)。</li>
+<li>事件触发顺序是<code>touch</code> -> <code>click</code> -><code>href</code></li>
+<li>"命中率"来说， <code>href</code>==<code>click</code> > <code>touchstart</code> > <code>"tap"</code></li>
 </ol>
 
 
