@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Tedz]]></title>
-  <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
+  <title><![CDATA[Category: mobile | Tedz]]></title>
+  <link href="http://tedzhou.github.com/blog/categories/mobile/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
   <updated>2012-12-22T17:26:44+08:00</updated>
   <id>http://tedzhou.github.com/</id>
