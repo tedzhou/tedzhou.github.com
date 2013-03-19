@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Tedz</title>
+  <title>proxy - Tedz</title>
   <meta name="author" content="tedzhou">
 
   
-  <meta name="description" content="
-">
+  <meta name="description" content="一键代理 目的 android 2.3没有全局的代理机制，手机上调试太困难。 所以这个工具的目的就是让android 2.3手机上使用PC上的fiddler来做代理工具。 实现 android上虽然没有全局代理，但是每个连接实际上都被防火墙(iptables)截获，那么在防火墙上监听80端口， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://tedzhou.github.com/">
+  <link rel="canonical" href="http://tedzhou.github.com/blog/2012/12/28/proxy/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -63,51 +62,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/01/23/about-tracing/">About_tracing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-23T19:27:00+08:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/28/proxy/">Proxy</a></h1>
+      <h1 class="entry-title">Proxy</h1>
     
     
       <p class="meta">
@@ -130,7 +90,7 @@
   </header>
 
 
-  <div class="entry-content"><h1>一键代理</h1>
+<div class="entry-content"><h1>一键代理</h1>
 
 <hr />
 
@@ -239,22 +199,16 @@ route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
 
 <p>因为安卓手机型号太多，不一定每个型号都测过，如果有问题欢迎联系我.</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/22/tap/">Tap</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">tedzhou</span></span>
+
+      
 
 
 
@@ -266,66 +220,34 @@ route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
   
 
 
-<time datetime="2012-12-22T15:11:00+08:00" pubdate data-updated="true">Dec 22<span>nd</span>, 2012</time>
-        
-      </p>
+<time datetime="2012-12-28T20:17:00+08:00" pubdate data-updated="true">Dec 28<span>th</span>, 2012</time>
+      
+
+
+    </p>
     
-  </header>
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://tedzhou.github.com/blog/2012/12/28/proxy/" data-via="" data-counturl="http://tedzhou.github.com/blog/2012/12/28/proxy/" >Tweet</a>
+  
+  
+  
+</div>
 
-
-  <div class="entry-content"><h1>开发touch遇到的坑之一:android下浏览器tap无反应</h1>
-
-<p>第一次发touch版本就遇到各种问题，这是第一个问题：android 2。3的机器上， <code>a标签</code>上<code>delegate</code>了个<code>tap</code>事件，点击后<code>a标签</code>高亮了，却<em>有时候</em>没有触发<code>tap</code>。</p>
-
-<p>遇到这个问题的时候我第一反应就是要换个底层库，因为我们用的是自己写的库，明显是最让人不放心的。但问题是换了<code>zetpo</code>之后还是没有解决这个问题，这时候就有点凌乱了。因为要赶着上活动，接着就各种风声鹤唳地想办法，最后也不知道是怎么定下来的:</p>
-
-<pre><code>用`touchstart`事件代替`tap`，然后把字体改大些就稍微好点了，*多数情况*下点击`a标签`都会有响应了。
-</code></pre>
-
-<p>虽然版本发了，但是<code>touchstart</code>事件带来其他副作用，例如太容易误操作了。所以还是要研究个彻底。</p>
-
-<hr />
-
-<h2>结论</h2>
-
-<p>考虑到这些研究比较白痴，无非就是一些排列组合，所以直接给出结论:</p>
-
-<ol>
-<li>可点击区域小的时候， <code>touch</code> 不一定会触发， 但<code>click</code> 一定会触发， <code>href</code> 也会触发。(a标签高亮了是因为href)。</li>
-<li>事件触发顺序是<code>touch</code> -> <code>click</code> -><code>href</code></li>
-<li>&#8220;命中率&#8221;来说， <code>href</code>==<code>click</code> > <code>touchstart</code> > <code>"tap"</code></li>
-</ol>
-
-
-<p><em>虽然tap在android 2。3下命中比较低， 但由于tap还是会比click响应要快， 所以多数情况下还是采用增大可点击区域使用tap事件会更好。</em></p>
-
-<hr />
-
-<h2><a href="http://tedzhou.github.com/demo/tap.html">Demo</a></h2>
-
-<ol>
-<li>第一部分测试字体大小delegate <code>tap/touchstart</code> 和<code>href</code> 的命中率， 结论是字体小的<code>tap</code> 命中率非常低， <code>href</code>全命中。 换用<code>touchstart</code> ， <code>touchstart</code> 的成功率比<code>tap</code> 的高， 但也比<code>href</code> 要低，不是全中。</li>
-<li>第二部分测试<code>href</code> 对delegate <code>tap/touchstart</code> 命中有没有影响， 结论<code>tap</code> 和<code>touchstart</code> 还是命中率非常低。</li>
-<li>第三部分测试加上<code>padding</code> 后增大可点击区域命中率有无提升，结论是有的。</li>
-<li>第四部分测试不用delegate， <code>touchstart</code> 和<code>href</code> 的命中率， 结论是和第一部分测试没啥区别。</li>
-<li>第五部分测试<code>onclick</code> 和<code>href</code> 的命中率， 结论是两者都是全中的。</li>
-<li>第六部分测试<code>onclick</code> 和<code>touchstart</code> 的命中率， 结论是<code>onclick</code> 还是全中， <code>touchstart</code> 字体小的还是比较低。</li>
-<li>注意的是， 以上六个测试都符合事件触发顺序是touch->click->href。</li>
-</ol>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/12/22/tap/" title="Previous Post: tap">&laquo; tap</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/01/23/about-tracing/" title="Next Post: about_tracing">about_tracing &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
 
 </div>
-  
-  
 
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
@@ -354,6 +276,7 @@ route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
 
   
 </aside>
+
 
     </div>
   </div>

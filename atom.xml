@@ -4,7 +4,7 @@
   <title><![CDATA[Tedz]]></title>
   <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
-  <updated>2012-12-22T20:22:45+08:00</updated>
+  <updated>2013-03-19T17:25:21+08:00</updated>
   <id>http://tedzhou.github.com/</id>
   <author>
     <name><![CDATA[tedzhou]]></name>
@@ -12,6 +12,131 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[about_tracing]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/01/23/about-tracing/"/>
+    <updated>2013-01-23T19:27:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/01/23/about-tracing</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[proxy]]></title>
+    <link href="http://tedzhou.github.com/blog/2012/12/28/proxy/"/>
+    <updated>2012-12-28T20:17:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2012/12/28/proxy</id>
+    <content type="html"><![CDATA[<h1>一键代理</h1>
+
+<hr />
+
+<h2>目的</h2>
+
+<hr />
+
+<p>android 2.3没有全局的代理机制，手机上调试太困难。 所以这个工具的目的就是让android 2.3手机上使用PC上的fiddler来做代理工具。</p>
+
+<hr />
+
+<h2>实现</h2>
+
+<hr />
+
+<p>android上虽然没有全局代理，但是每个连接实际上都被防火墙(<a href="http://www.netfilter.org/"><code>iptables</code></a>)截获，那么在防火墙上监听<code>80端口</code>，然后转发到PC上的<code>fiddle</code>就好了。可惜iptables只能把包转发到本机，那么可以在android手机上运行一个进程，监听某个端口，<code>iptables</code>把包转到那端口，再由改进程把包转到PC的<code>80端口</code>。</p>
+
+<h3>adb工具</h3>
+
+<hr />
+
+<p>adb全称是<a href="http://developer.android.com/tools/help/adb.html">Android Debug Bridge</a>。
+允许PC通过usb数据线调试android手机，我们利用adb来进行手机与PC的通信。</p>
+
+<h3>iptables</h3>
+
+<hr />
+
+<p>iptables贯穿整个网络传输流程，这里只关注出口监控，只要是将要从80端口发出的都是我们需要代理的包。</p>
+
+<pre><code>adb shell /tedproxy/iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to 8123
+</code></pre>
+
+<p>通过以上代码即可实现80端口的包都转到8123上。</p>
+
+<h3>redsocks</h3>
+
+<hr />
+
+<p>redsocks 是开源的包转发工具。进行一下配置就可以监听8123端口的数据包，然后转发到<code>10.55.58.111:8888</code>上，一般是fiddler。</p>
+
+<pre><code>```
+redsocks {
+    local_ip = 127.0.0.1;
+    local_port = 8123;
+    ip = 10.66.58.111;
+    port = 8888;
+    type = http-relay;
+}
+```
+</code></pre>
+
+<p>这里需要利用下adb工具，因为每次开机pc的ip地址都是不一样的，那么每次都要手动填写配置是相当麻烦的，
+所以这里我们用adb工具来把pc的ip地址写入redsocks的配置里面，这样会方便很多。而通过批处理文件获取ip比较麻烦，因为批处理文件对字符串操作还是比较弱，
+所以使用了node来获取ip地址。</p>
+
+<h3>利用freewifi</h3>
+
+<hr />
+
+<p>如果PC和手机不是在同一个局域网内会出现NAT映射之类的问题导致手机转发过去的包PC无法收到。所以为了让PC和手机在同一个局域网，我利用了<code>freewifi</code>。
+手机能连上<code>freewifi</code>这是毫无疑问的，但PC要连上freewif就需要多一张无线网卡。同时，当PC出现了两张网卡的时候，
+网络会出现问题的。因为PC发出去的数据包不知道走那个网卡出去。</p>
+
+<p>解决方法是配置route表。</p>
+
+<pre><code>```
+route delete 0.0.0.0
+route add 0.0.0.0 mask 0.0.0.0 %freewifi_gate%
+route add 10.0.0.0 mask 255.0.0.0 %inter_gate%
+route add 192.0.0.0 mask 255.0.0.0 %inter_gate%
+route add 172.0.0.0 mask 255.0.0.0 %inter_gate%
+route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
+```
+</code></pre>
+
+<p>以上代码实现的是，让内网的ip都走连接都走PC原本的网卡，其他连接都走freewifi. 这样就能兼容两张网卡的使用了.</p>
+
+<p>虽然以上代码看起来很简单，但是因为公司网络比较复杂，这里我还是用了nodejs来完成上述的设置.</p>
+
+<h3>最后串起来</h3>
+
+<hr />
+
+<p>最后串起来的流程应该是这样的:
+1. 运行<code>network.bat</code>. network.bat会调用nodejs，把PC上的两张网卡兼容了。
+2. 运行<code>run.bat</code> 。这里会先调用nodejs，把ip地址拿到，生成redsocks配置文件传送到手机上,然后脚本配置<code>iptables</code>和启动<code>resocks</code>进程。 (虽然是一键，但是流程还蛮多的~)
+3. 记得把手机通过usb连上PC上，还要打开pc上的fiddler，还要打开fiddler的远程代理呀(这个大家都会的就不说了)。</p>
+
+<p>当不需要代理的时候运行<code>stop.bat</code>清空<code>iptables</code>的规则即可。</p>
+
+<h2>依赖</h2>
+
+<hr />
+
+<ol>
+<li>手机必须root了，否则没有权限改iptables</li>
+<li>PC上有安装nodejs和fiddler.</li>
+<li>要有一张无线网卡.</li>
+</ol>
+
+
+<h2>说明下</h2>
+
+<hr />
+
+<p>因为安卓手机型号太多，不一定每个型号都测过，如果有问题欢迎联系我.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[tap]]></title>
