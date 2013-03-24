@@ -122,24 +122,29 @@ tools很好用，却没能告诉开发者究竟是哪一行样式是性能瓶颈
 <p>在PC上的实验结果真的让我以为找到了<em>答案</em>。
 如图，<code>==base==</code>为原始的样式。去掉<code>position:fixed</code>后的<code>spf</code>和<code>==base==</code>甚至小了3、4
 倍！而且这个实验结果也是符合预期的，<code>position:fixed</code>对滚动性能的影响也是众所周知的差了（[参见: Google I/O 2012 ]
-(http://www.youtube.com/embed/hAzhayTnhEI?rel=0)）。
-<img src="/images/pc_chrome.jpg">
-而且排第二差的是一个用来治疗ios图片加载闪屏的属性，android上用不上的css属性（其实ios上也没达到正常疗效），那么干掉它就能达到提升性能的目的了！当然，必须要在手机上有同样的表现才有证明这个工具works。</p>
+(http://www.youtube.com/embed/hAzhayTnhEI?rel=0)）。</p>
+
+<p><img src="/images/pc_chrome.jpg"></p>
+
+<p>而且排第二差的是一个用来治疗ios图片加载闪屏的属性，android上用不上的css属性（其实ios上也没达到正常疗效），那么干掉它就能达到提升性能的目的了！当然，必须要在手机上有同样的表现才有证明这个工具works。</p>
 
 <h3>手机上的Chrome</h3>
 
-<p>手机上的Chrome同样找出了<code>position:fixed</code>的<code>spf</code>比<code>==base==</code>小1倍，也符合预期。
-<img src="/images/mobile_chrome.jpg"></p>
+<p>手机上的Chrome同样找出了<code>position:fixed</code>的<code>spf</code>比<code>==base==</code>小1倍，也符合预期。</p>
+
+<p><img src="/images/mobile_chrome.jpg"></p>
 
 <p>为了验证这个工具能找出<code>position:fixed</code>之外的性能瓶颈，我
-把之前龙哥去掉的<code>box-shadow</code>加上，也能查出来。那就表示这个工具还真有用！
-<img src="/images/mobile_chrome_boxshadow.jpg"></p>
+把之前龙哥去掉的<code>box-shadow</code>加上，也能查出来。那就表示这个工具还真有用！</p>
+
+<p><img src="/images/mobile_chrome_boxshadow.jpg"></p>
 
 <h3>webview</h3>
 
 <p>目前触屏项目访问量最多的入口就是在webview，而且用户投诉也是集中在webview上。但在webview的测试结果却呈现出完全无规律的状态。<code>spf
-</code>没有明显小的也没有明显大的。说明在webview里面，这个思路行不通。
-<img src="/images/mobile_webview.jpg"></p>
+</code>没有明显小的也没有明显大的。说明在webview里面，这个思路行不通。</p>
+
+<p><img src="/images/mobile_webview.jpg"></p>
 
 <h2>分析模型失败的原因</h2>
 
@@ -156,7 +161,7 @@ really messy is on mobile devices, because they have comparatively limited VRAM,
 <h2>总结</h2>
 
 <p>cssTest工具没有成功，让我对纯js监控css性能产生了怀疑。希望能自己包装webview，在webview里直接监控css的fps
-。虽然已经有了查看fps的应用，因为要去掉每个css样式，再记录fps，现有的fps还是不够用。</p>
+。虽然已经有了查看fps的应用，因为要去掉每个css样式，再记录fps，现有的fps还是不够用的。</p>
 
 <h2>source code</h2>
 
