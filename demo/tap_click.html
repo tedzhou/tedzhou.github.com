@@ -26,7 +26,6 @@
 
 		#log {
 			width: 100%;
-			height: 100%;
 		}
 	</style>
 	<script type="text/javascript" src="./js/lib/zepto.js"></script>
@@ -40,12 +39,12 @@
 	$('#before').on('tap', function (e) {
 		$('#before').hide();
 		$('#after').show();
-		$('log').html($('log').html() +'\r\n'+ 'tap到红色');
+		$('#log').html($('#log').html() +'\r\n'+ 'tap到红色');
 		console.log('tap', e, e.target, this);
 	});
 
 	$('#after').on('click', function (e) {
-		$('log').html($('log').html() +'\r\n'+ 'click到黑色');
+		$('#log').html($('#log').html() +'\r\n'+ 'click到黑色');
 		console.log('click', e, e.target, this);
 	});
 </script>
