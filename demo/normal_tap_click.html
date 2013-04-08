@@ -31,13 +31,19 @@
 	</style>
 </head>
 <body>
-<h1>normal</h1>
+<h1>touchend->show->click</h1>
 <a class="before" id="before">before</a>
 <a class="after" id="after">after</a>
 
-<h1>touchstart 后放出， 看touchend</h1>
+
+<h1>touchstart->show->click</h1>
+<a class="before" id="touchstart">tapstart</a>
+<a class="after" id="click">tapend</a>
+
+<h1>touchstart->show->touchend</h1>
 <a class="before" id="tapstart">tapstart</a>
 <a class="after" id="tapend">tapend</a>
+
 
 <div contenteditable="true" id="log">
 	normal:
@@ -63,7 +69,25 @@
 	});
 
 </script>
+<script>
+	var touchstart = document.querySelector('#touchstart');
+	var click = document.querySelector('#click');
+	var log = document.querySelector('#log');
 
+	click.style.display = "none";
+	touchstart.addEventListener('touchstart', function (e) {
+		touchstart.style.display = "none";
+		click.style.display = "";
+		log.innerHTML += ('\r\n' + 'touchstart红色');
+		console.log('touchstart', e, e.target, this);
+	});
+
+	click.addEventListener('click', function (e) {
+		log.innerHTML += ('\r\n' + 'click到黑色');
+		console.log('click', e, e.target, this);
+	});
+
+</script>
 <script>
 	var tapstart = document.querySelector('#tapstart');
 	var tapend = document.querySelector('#tapend');
@@ -83,6 +107,7 @@
 	});
 
 </script>
+
 
 </body>
 </html>
