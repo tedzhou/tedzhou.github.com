@@ -1,7 +1,7 @@
 ﻿﻿<!DOCTYPE html>
 <html>
 <head>
-	<title>tap_click</title>
+	<title>zepto_tap_click</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="description" content="">
 	<meta name="HandheldFriendly" content="True">
@@ -16,37 +16,47 @@
 			max-height: 100px;
 		}
 
-		#before {
+		.before {
 			background: red;
 		}
 
-		#after {
+		.after {
 			background: #000000;
 		}
 
-		#log {
+		.log {
 			width: 100%;
 		}
 	</style>
+
 	<script type="text/javascript" src="./js/lib/zepto.js"></script>
+	<script>
+		var Z = Zepto;
+		Z(function () {
+			Z('#Zafter').hide();
+			Z('#Zbefore').on('tap', function (e) {
+				Z('#Zbefore').hide();
+				Z('#Zafter').show();
+				Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到红色');
+				console.log('tap', e, e.target, this);
+			});
+
+			Z('#Zafter').on('click', function (e) {
+				Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到黑色');
+				console.log('click', e, e.target, this);
+			});
+		});
+	</script>
 </head>
 <body>
-<a id="before">before</a>
-<a id="after">after</a>
-<div contenteditable="true" id="log"></div>
-<script>
-	$('#after').hide();
-	$('#before').on('tap', function (e) {
-		$('#before').hide();
-		$('#after').show();
-		$('#log').html($('#log').html() +'\r\n'+ 'tap到红色');
-		console.log('tap', e, e.target, this);
-	});
+<h1>zepto</h1>
+<a class="before" id="Zbefore">Zbefore</a>
+<a class="after" id="Zafter">Zafter</a>
 
-	$('#after').on('click', function (e) {
-		$('#log').html($('#log').html() +'\r\n'+ 'click到黑色');
-		console.log('click', e, e.target, this);
-	});
-</script>
+<div contenteditable="true" id="Zlog">
+	zepto:
+</div>
+
+
 </body>
 </html>
