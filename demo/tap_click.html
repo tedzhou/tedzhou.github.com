@@ -1,0 +1,45 @@
+﻿﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>tap_click</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<style>
+		a {
+			min-width: 50px;
+			max-height: 100px;
+		}
+
+		#before {
+			background: red;
+		}
+
+		#after {
+			background: #000000;
+		}
+	</style>
+	<script type="text/javascript" src="./js/lib/zepto.js"></script>
+</head>
+<body>
+<a id="before">before</a>
+<a id="after">after</a>
+<script>
+	$('#after').hide();
+	$('#before').on('tap', function (e) {
+		$('#before').hide();
+		$('#after').show();
+		console.log('tap', e, e.target, this);
+	});
+
+	$('#after').on('click', function (e) {
+		console.log('click', e, e.target, this);
+	});
+</script>
+</body>
+</html>
