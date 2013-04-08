@@ -31,23 +31,24 @@
 	</style>
 </head>
 <body>
+<div contenteditable="true" id="log">
+	normal:
+</div>
 <h1>touchend->show->click</h1>
 <a class="before" id="before">before</a>
 <a class="after" id="after">after</a>
 
 
 <h1>touchstart->show->click</h1>
-<a class="before" id="touchstart">tapstart</a>
-<a class="after" id="click">tapend</a>
+<span class="before" id="touchstart">tapstart_span</span>
+<span class="after" id="click">tapend</span>
 
 <h1>touchstart->show->touchend</h1>
 <a class="before" id="tapstart">tapstart</a>
 <a class="after" id="tapend">tapend</a>
 
 
-<div contenteditable="true" id="log">
-	normal:
-</div>
+
 
 <script>
 	var before = document.querySelector('#before');
