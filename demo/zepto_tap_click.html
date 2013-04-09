@@ -33,7 +33,7 @@
 	<script type="text/javascript" src="./js/lib/zepto.js"></script>
 	<script>
 		var Z = Zepto;
-		Z.delegate('.before', 'tap', function (e) {
+		Z(document.body).delegate('.before', 'tap', function (e) {
 			Z('#Zbefore').hide();
 			Z('#Zafter').show();
 			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到红色');
