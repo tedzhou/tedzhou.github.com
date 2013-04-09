@@ -40,7 +40,7 @@
 			console.log('tap', e, e.target, this);
 		});
 
-		Z(document.body).delegate('.after', 'tap', function (e) {
+		Z(document.body).delegate('.after', 'click', function (e) {
 			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到黑色');
 			console.log('click', e, e.target, this);
 		});
