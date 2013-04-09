@@ -49,6 +49,11 @@
 			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到黑色');
 			console.log('click', e, e.target, this);
 		});
+
+		Z(document.body).delegate('.Z_click', 'click', function (e) {
+			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到Z_delegate_Click');
+		});
+
 		Z(function () {
 			Z('#Zafter').hide();
 //			Z('#Zbefore').on('tap', function (e) {
@@ -75,6 +80,6 @@
 	zepto:
 </div>
 
-
+<a class="Z_click">Z_delegate_Click</a>
 </body>
 </html>
