@@ -44,6 +44,11 @@
 			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到黑色');
 			console.log('click', e, e.target, this);
 		});
+
+		Z(document.body).delegate('.after', 'tap', function (e) {
+			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到黑色');
+			console.log('click', e, e.target, this);
+		});
 		Z(function () {
 			Z('#Zafter').hide();
 //			Z('#Zbefore').on('tap', function (e) {
