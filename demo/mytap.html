@@ -75,8 +75,8 @@
 				e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
 				0, null);
 		ev._fake = true;
-		target.dispatchEvent(ev);
 		writeLog('init a fake click before.');
+		target.dispatchEvent(ev);
 	});
 
 	before.addEventListener('click', function (e) {
