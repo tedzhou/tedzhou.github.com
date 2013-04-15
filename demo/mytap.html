@@ -34,9 +34,14 @@
 <div contenteditable="true" id="log">
 	normal:
 </div>
-<h1>touchend->show->click</h1>
+<h1>touchend->->preventDefault->show->click</h1>
 <a class="before" id="before">before</a>
 <a class="after" id="after">after</a>
+
+
+<h1>touchend->->show->click</h1>
+<a class="before" id="nbefore">before</a>
+<a class="after" id="nafter">after</a>
 
 <div id="log"></div>
 <script>
@@ -50,7 +55,7 @@
 	after.style.display = "none";
 
 	function writeLog(s) {
-		log.innerHTML += (s + '\n');
+		log.innerHTML += ('<p>' + s + '</p>');
 	}
 	before.addEventListener('touchend', function (e) {
 
@@ -73,8 +78,34 @@
 		target.dispatchEvent(ev);
 		writeLog('init a fake click before.');
 	});
+
+	before.addEventListener('click', function (e) {
+		writeLog('click before.');
+	});
+
 	after.addEventListener('click', function (e) {
 		writeLog('click after.');
+	});
+
+	// 没有preventDefault
+	var nbefore = getEl('#nbefore');
+	var nafter = getEl('#nafter');
+
+	nafter.style.display = "none";
+
+	nbefore.addEventListener('touchend', function (e) {
+		writeLog('touchend nbefore.');
+		nbefore.style.display = "none";
+		nafter.style.display = "";
+		writeLog('toggle display.');
+	});
+
+	nbefore.addEventListener('click', function (e) {
+		writeLog('click nbefore.');
+	});
+
+	nafter.addEventListener('click', function (e) {
+		writeLog('click nafter.');
 	});
 </script>
 </body>
