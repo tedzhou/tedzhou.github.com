@@ -48,8 +48,6 @@
 <a class="after" id="tapend">tapend</a>
 
 
-
-
 <script>
 	var before = document.querySelector('#before');
 	var after = document.querySelector('#after');
@@ -60,7 +58,9 @@
 	before.addEventListener('touchend', function (e) {
 		before.style.display = "none";
 		after.style.display = "";
-		log.innerHTML += ('\r\n' + 'touchend红色');
+		e.preventDefault();
+
+		log.innerHTML += ('\r\n' + 'touchend红色 + preventDefault');
 		console.log('touchend', e, e.target, this);
 	});
 
