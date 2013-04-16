@@ -112,6 +112,8 @@
 	});
 
 	nafter.addEventListener('click', function (e) {
+
+		writeLog('wtf.' + e.target.style.display + '$');
 		writeLog('click nafter.');
 	});
 
@@ -136,7 +138,7 @@
 //					e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
 //					0, null);
 //			ev._fake = true;
-			writeLog('!!!!!!!!!!init a fake click xbefore.');
+		writeLog('!!!!!!!!!!init a fake click xbefore.');
 //			target.dispatchEvent(ev);
 //		}
 	});
