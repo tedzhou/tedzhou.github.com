@@ -119,6 +119,8 @@
 	xbefore.addEventListener('touchend', function (e) {
 
 		e.preventDefault();
+		e.cancelBubble = true;
+		e.stopPropagation();
 		writeLog('prevent xbefore.');
 
 		writeLog('touchend xbefore.');
