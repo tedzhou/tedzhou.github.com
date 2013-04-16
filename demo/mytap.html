@@ -125,17 +125,17 @@
 		var target = e.target;
 		// display none之后不能触发事件
 
-		if (window.getComputedStyle(target, null)['display'] != "none") {
-			var point = e.changedTouches[0] || e;
-			var ev = document.createEvent('MouseEvents');
-			ev.initMouseEvent('click', true, true, e.view, 1,
-					0, 0, 0, 0,
-					e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
-					0, null);
-			ev._fake = true;
-			writeLog('init a fake click xbefore.');
-			target.dispatchEvent(ev);
-		}
+//		if (window.getComputedStyle(target, null)['display'] != "none") {
+//			var point = e.changedTouches[0] || e;
+//			var ev = document.createEvent('MouseEvents');
+//			ev.initMouseEvent('click', true, true, e.view, 1,
+//					0, 0, 0, 0,
+//					e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+//					0, null);
+//			ev._fake = true;
+//			writeLog('init a fake click xbefore.');
+//			target.dispatchEvent(ev);
+//		}
 	});
 
 	xbefore.addEventListener('click', function (e) {
