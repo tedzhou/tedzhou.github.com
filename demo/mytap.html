@@ -119,7 +119,7 @@
 
 	var xbefore = getEl('#xbefore');
 	xbefore.addEventListener('touchend', function (e) {
-
+		before.focus();
 		e.preventDefault();
 		e.cancelBubble = true;
 		e.stopPropagation();
