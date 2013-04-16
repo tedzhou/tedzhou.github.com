@@ -35,14 +35,16 @@
 	normal:
 </div>
 <h1>touchend->->preventDefault->show->click</h1>
-<a class="before" id="before">befor
-	e</a>
+<a class="before" id="before">before</a>
 <a class="after" id="after">after</a>
 
 
 <h1>touchend->->show->click</h1>
 <a class="before" id="nbefore">before</a>
 <a class="after" id="nafter">after</a>
+
+<h1>normal</h1>
+<a class="before" id="xbefore">before</a>
 
 <div id="log"></div>
 <script>
@@ -112,6 +114,34 @@
 	nafter.addEventListener('click', function (e) {
 		writeLog('click nafter.');
 	});
+
+	var xbefore = getEl('#xbefore');
+	xbefore.addEventListener('touchend', function (e) {
+
+		e.preventDefault();
+		writeLog('prevent xbefore.');
+
+		writeLog('touchend xbefore.');
+		var target = e.target;
+		// display none之后不能触发事件
+
+		if (window.getComputedStyle(target, null)['display'] != "none") {
+			var point = e.changedTouches[0] || e;
+			var ev = document.createEvent('MouseEvents');
+			ev.initMouseEvent('click', true, true, e.view, 1,
+					point.screenX, point.screenY, point.clientX, point.clientY,
+					e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+					0, null);
+			ev._fake = true;
+			writeLog('init a fake click xbefore.');
+		}
+		target.dispatchEvent(ev);
+	});
+
+	xbefore.addEventListener('click', function (e) {
+		writeLog('click xbefore.');
+	});
+
 </script>
 </body>
 </html>
