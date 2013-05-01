@@ -111,7 +111,7 @@ Scroller.prototype.doMomentum = function () {
 	var maxDisplacement = -(this.scrollerHeight - this.frameHeight + this.contentOffsetY);
 
 	var velocity = this.getEndVelocity();
-	var acceleration = velocity < 0 ? 0.0005 : -0.0005;
+	var acceleration = velocity < 0 ? 0.001 : -0.001;
 	var displacement = -(velocity * velocity) / (2 * acceleration);
 	if (displacement < maxDisplacement) {
 		displacement = maxDisplacement;
