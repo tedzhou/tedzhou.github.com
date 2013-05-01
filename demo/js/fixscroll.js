@@ -123,7 +123,7 @@ Scroller.prototype.doMomentum = function () {
 //	var displacement = maxDisplacement;
 	var time = -velocity / acceleration;
 
-	this.element.style.webkitTransform = '-webkit-transform ' + time + 'ms cubic-bezier(0.33, 0.66, 0.66 ,1)';
+	this.element.style.webkitTransition = '-webkit-transform ' + time + 'ms cubic-bezier(0.33, 0.66, 0.66 ,1)';
 
 	var newY = this.contentOffsetY + displacement;
 	this.contentOffsetY = newY;
