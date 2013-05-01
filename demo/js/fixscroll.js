@@ -108,16 +108,17 @@ Scroller.prototype.shouldStartMomentum = function () {
 Scroller.prototype.doMomentum = function () {
 	// Calculate the movement properties.
 	// Implement getEndVelocity using the start and end position / time
-	var maxDisplacement = -(this.scrollerHeight - this.frameHeight + this.contentOffsetY);
+	var maxDisplacement = -(this.contentOffsetY);
+	var minDisplacement = -(this.scrollerHeight - this.frameHeight + this.contentOffsetY);
 
 	var velocity = this.getEndVelocity();
 	var acceleration = velocity < 0 ? 0.001 : -0.001;
 	var displacement = -(velocity * velocity) / (2 * acceleration);
-	if (displacement < maxDisplacement) {
+	if (displacement > maxDisplacement) {
 		displacement = maxDisplacement;
 	}
-	if(displacement > 0) {
-		displacement = 0;
+	if (displacement < minDisplacement) {
+		displacement = minDisplacement;
 	}
 
 //	var displacement = maxDisplacement;
