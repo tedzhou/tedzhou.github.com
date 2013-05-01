@@ -119,7 +119,7 @@ Scroller.prototype.doMomentum = function () {
 	var minDisplacement = -(this.scrollerHeight - this.frameHeight + this.contentOffsetY);
 
 	var velocity = this.getEndVelocity();
-	var acceleration = velocity < 0 ? 0.001 : -0.001;
+	var acceleration = velocity < 0 ? 0.0005 : -0.0005;
 	var displacement = -(velocity * velocity) / (2 * acceleration);
 	if (displacement > maxDisplacement) {
 		displacement = maxDisplacement;
@@ -135,7 +135,7 @@ Scroller.prototype.doMomentum = function () {
 
 		self.element.style.webkitTransition = '-webkit-transform ' + time + 'ms cubic-bezier(0.33, 0.66, 0.66 ,1)';
 
-		var newY = this.contentOffsetY + displacement;
+		var newY = self.contentOffsetY + displacement;
 		self.contentOffsetY = newY;
 		self.element.style.webkitTransform = 'translate3d(0,' + newY + 'px, 0)';
 		console.log('doMomentum');
