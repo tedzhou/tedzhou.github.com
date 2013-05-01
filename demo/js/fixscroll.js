@@ -3,6 +3,10 @@ document.body.addEventListener('touchmove', function (e) {
 	e.preventDefault();
 }, false);
 
+var raf = window.webkitRequestAnimationFrame || window.requestAnimationFrame || function (cb) {
+	setTimeout(cb, 16.6)
+};
+
 var Scroller = function (element) {
 	this.element = element;
 	this.startTouchY = 0;
@@ -71,7 +75,10 @@ Scroller.prototype.animateTo = function (offsetY) {
 	this.contentOffsetY = offsetY;
 
 	// we use webkit-transforms with translate3d because these animations will be hardware accelerated, and thereofre significantly faster than changeing the top value.
-	this.element.style.webkitTransform = 'translate3d(0, ' + offsetY + 'px, 0)';
+	var self = this;
+	raf(function () {
+		self.element.style.webkitTransform = 'translate3d(0, ' + offsetY + 'px, 0)';
+	});
 	console.log('animateTo' + ':' + offsetY);
 };
 
@@ -123,13 +130,16 @@ Scroller.prototype.doMomentum = function () {
 
 //	var displacement = maxDisplacement;
 	var time = -velocity / acceleration;
+	var self = this;
+	raf(function () {
 
-	this.element.style.webkitTransition = '-webkit-transform ' + time + 'ms cubic-bezier(0.33, 0.66, 0.66 ,1)';
+		self.element.style.webkitTransition = '-webkit-transform ' + time + 'ms cubic-bezier(0.33, 0.66, 0.66 ,1)';
 
-	var newY = this.contentOffsetY + displacement;
-	this.contentOffsetY = newY;
-	this.element.style.webkitTransform = 'translate3d(0,' + newY + 'px, 0)';
-	console.log('doMomentum');
+		var newY = this.contentOffsetY + displacement;
+		self.contentOffsetY = newY;
+		self.element.style.webkitTransform = 'translate3d(0,' + newY + 'px, 0)';
+		console.log('doMomentum');
+	});
 };
 
 Scroller.prototype.getEndVelocity = function () {
@@ -140,7 +150,6 @@ Scroller.prototype.getEndVelocity = function () {
 };
 
 Scroller.prototype.stopMomentum = function () {
-
 	console.log('stopMomentum');
 	if (this.isDecelerating()) {
 		var style = document.defaultView.getComputedStyle(this.element, null);
