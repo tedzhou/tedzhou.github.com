@@ -4,7 +4,7 @@
   <title><![CDATA[Tedz]]></title>
   <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
-  <updated>2013-05-05T23:44:00+08:00</updated>
+  <updated>2013-05-05T23:47:40+08:00</updated>
   <id>http://tedzhou.github.com/</id>
   <author>
     <name><![CDATA[tedzhou]]></name>
@@ -39,17 +39,11 @@ layer，所以网上很多朋友都指出说可能是这个layer太大，导致�
 <h2>设计实验</h2>
 
 <p><a href="http://tedzhou.github.com/demo/flicker/test3d.html">Demo在这</a>
-两个纬度排列组合各种条件，这里直接给结论好了:</p>
-
-<h3>若父节点有GPU加速，且高度（包括border）小于1280px，不闪。</h3>
-
-<h3>若父节点有GPU加速，且高度（包括border）大于1280px，父节点闪</h3>
-
-<h4>若子节点没有GPU加速，子节点也闪</h4>
-
-<h4>若子节点有GPU加速，且高度小于1280px,子节点不闪（子节点不闪的部分可以遮挡父节点的闪动）</h4>
-
-<h4>若子节点有GPU加速，且高度大于1280px,子节点闪</h4>
+两个纬度排列组合各种条件，这里直接给结论好了:
+若父节点有GPU加速，且高度（包括border）小于1280px，不闪。若父节点有GPU加速，且高度（包括border）大于1280px，父节点闪，子节点分一下情况:
+1. 若子节点没有GPU加速，子节点也闪
+2. 若子节点有GPU加速，且高度小于1280px,子节点不闪（子节点不闪的部分可以遮挡父节点的闪动）
+3. 若子节点有GPU加速，且高度大于1280px,子节点闪</p>
 
 <p>所以结论是，如果一个高于1280px的列表(ul)，那么就要让它的列表项(li)加上GPU加速,且要盖住整个列表，那么列表的闪动会被列表项给挡住。
 而且如果列表项本身如果也超过1280px，那就要让他的孙元素盖住它，一直递归下去。</p>
