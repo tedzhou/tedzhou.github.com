@@ -4,7 +4,7 @@
   <title><![CDATA[Tedz]]></title>
   <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
-  <updated>2013-05-05T23:37:18+08:00</updated>
+  <updated>2013-05-05T23:38:38+08:00</updated>
   <id>http://tedzhou.github.com/</id>
   <author>
     <name><![CDATA[tedzhou]]></name>
@@ -14,13 +14,11 @@
 
   
   <entry>
-    <title type="html"><![CDATA[safariflickering]]></title>
+    <title type="html"><![CDATA[Safari 里CSS GPU加速下闪动的bug]]></title>
     <link href="http://tedzhou.github.com/blog/2013/05/05/safariflickering/"/>
     <updated>2013-05-05T22:48:00+08:00</updated>
     <id>http://tedzhou.github.com/blog/2013/05/05/safariflickering</id>
-    <content type="html"><![CDATA[<h1>Safari 里CSS GPU加速下闪动的bug</h1>
-
-<h2>背景</h2>
+    <content type="html"><![CDATA[<h2>背景</h2>
 
 <p>主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
 1. 页面初始化时闪动
