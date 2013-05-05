@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>safariflickering - Tedz</title>
+  <meta name="author" content="tedzhou">
+
+  
+  <meta name="description" content="Safari 里CSS GPU加速下闪动的bug 背景 主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
+1. 页面初始化时闪动
+2. 按home键再回到safari iscroll为了加快滚动速度，使用了会开启gpu加速的属性-webkit-transform: &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://tedzhou.github.com/blog/2013/05/05/safariflickering/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Tedz" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Tedz</a></h1>
+  
+    <h2>just code</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:tedzhou.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Safariflickering</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-05T22:48:00+08:00" pubdate data-updated="true">May 5<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>Safari 里CSS GPU加速下闪动的bug</h1>
+
+<h2>背景</h2>
+
+<p>主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
+1. 页面初始化时闪动
+2. 按home键再回到safari</p>
+
+<p>iscroll为了加快滚动速度，使用了会开启gpu加速的属性<code>-webkit-transform: translateZ(0);</code>
+gpu加速会使webkit单独为这个render tree分配一个compositing
+layer，所以网上很多朋友都指出说可能是这个layer太大，导致渲染有bug。提出的解决思路是以毒攻毒，为iscroll下的子元素都设上<code>-webkit
+-transform: translateZ(0);</code>，让子元素也有自己的layer，单独渲染就不会闪动了。</p>
+
+<p>这个思路确实有用，但是在我们使用场景里面发现一级子元素不闪了，部分孙元素还在闪。然后我们再给孙元素加上，发现还有其他后代元素会闪。
+一怒之下，写了个<code>#scrllor * {-webkit-transform: translateZ(0);}</code>，
+让iscroll下所有的子孙元素都自己搞个layer，那坚决就不闪了。但是这么丑陋的方式有点不能接受，而且每个元素单独一个layer，webkit
+需要维护好每个layer，那个可见哪个不可见，也是一个性能隐患点（iphone5性能太好了，没感觉出来）。</p>
+
+<p>所以还是得想办法找出规律。之前和阿子看过另外一个iscroll闪动的问题（插入节点闪烁），就怀疑和高度有关系。</p>
+
+<h2>设计实验</h2>
+
+<p><a href="http://tedzhou.github.com/demo/flicker/test3d.html">Demo在这</a>
+两个纬度排列组合各种条件，这里直接给结论好了：
+- 若父节点有GPU加速，且高度（包括border）小于1280px，不闪。
+- 若父节点有GPU加速，且高度（包括border）大于1280px，父节点闪</p>
+
+<pre><code>+ 若子节点没有GPU加速，子节点也闪
++ 若子节点有GPU加速，且高度小于1280px,子节点不闪（子节点不闪的部分可以遮挡父节点的闪动）
++ 若子节点有GPU加速，且高度大于1280px,子节点闪
+</code></pre>
+
+<p>所以结论是，如果一个高于1280px的列表(ul)，那么就要让它的列表项(li)加上GPU加速,且要盖住整个列表，那么列表的闪动会被列表项给挡住。
+而且如果列表项本身如果也超过1280px，那就要让他的孙元素盖住它，一直递归下去。</p>
+
+<p>说明一下:1280px这种magic number是我在自己的ip5上的实验值，还没试过其他机器，不能保证每部机都一样。</p>
+
+<h2>关于layer和GPU加速</h2>
+
+<h4>如何看layer</h4>
+
+<p>如图
+<img src="/images/layer.jpg"></p>
+
+<h4>layer:</h4>
+
+<ol>
+<li>It&#8217;s the root object for the page</li>
+<li>It has explicit CSS position properties (relative, absolute or a transform)</li>
+<li>It is transparent</li>
+<li>Has overflow, an alpha mask or reflection</li>
+<li>Has a CSS filter</li>
+<li>Corresponds to <canvas> element that has a 3D (WebGL) context or an accelerated 2D context</li>
+<li>Corresponds to a <video> element</li>
+</ol>
+
+
+<h4>GPU加速:</h4>
+
+<ol>
+<li>Layer has 3D or perspective transform CSS properties</li>
+<li>Layer is used by <video> element using accelerated video decoding</li>
+<li>Layer is used by a <canvas> element with a 3D context or accelerated 2D context</li>
+<li>Layer is used for a composited plugin</li>
+<li>Layer uses a CSS animation for its opacity or uses an animated webkit transform</li>
+<li>Layer uses accelerated CSS filters</li>
+<li>Layer has a descendant that is a compositing layer</li>
+<li>Layer has a sibling with a lower z-index which has a compositing layer (in otherwords the layer is rendered on top of a composited layer)</li>
+</ol>
+
+
+<p><a href="http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome">参考 GPU Accelerated Compositing in Chrome</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">tedzhou</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-05T22:48:00+08:00" pubdate data-updated="true">May 5<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://tedzhou.github.com/blog/2013/05/05/safariflickering/" data-via="" data-counturl="http://tedzhou.github.com/blog/2013/05/05/safariflickering/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/03/24/csstest/" title="Previous Post: csstest">&laquo; csstest</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/05/safariflickering/">safariflickering</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/24/csstest/">csstest</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/23/about-tracing/">about_tracing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/28/proxy/">proxy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/22/tap/">tap</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - tedzhou -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

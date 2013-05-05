@@ -9,8 +9,9 @@
   <meta name="author" content="tedzhou">
 
   
-  <meta name="description" content="cssTest工具失败经历记录 背景 之前和龙哥一起做了个导航条优化的需求，修改了导航条顶部导航的html结构和样式。过程中发现js代码没有改动的滚动的逻辑，新导航上了之后在android
-的chrome 上滚动卡的EB，Webview 中也有些卡顿，但没有chrome 里卡。 &hellip;">
+  <meta name="description" content="Safari 里CSS GPU加速下闪动的bug 背景 主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
+1. 页面初始化时闪动
+2. 按home键再回到safari iscroll为了加快滚动速度，使用了会开启gpu加速的属性-webkit-transform: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +66,113 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/05/safariflickering/">Safariflickering</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-05T22:48:00+08:00" pubdate data-updated="true">May 5<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Safari 里CSS GPU加速下闪动的bug</h1>
+
+<h2>背景</h2>
+
+<p>主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
+1. 页面初始化时闪动
+2. 按home键再回到safari</p>
+
+<p>iscroll为了加快滚动速度，使用了会开启gpu加速的属性<code>-webkit-transform: translateZ(0);</code>
+gpu加速会使webkit单独为这个render tree分配一个compositing
+layer，所以网上很多朋友都指出说可能是这个layer太大，导致渲染有bug。提出的解决思路是以毒攻毒，为iscroll下的子元素都设上<code>-webkit
+-transform: translateZ(0);</code>，让子元素也有自己的layer，单独渲染就不会闪动了。</p>
+
+<p>这个思路确实有用，但是在我们使用场景里面发现一级子元素不闪了，部分孙元素还在闪。然后我们再给孙元素加上，发现还有其他后代元素会闪。
+一怒之下，写了个<code>#scrllor * {-webkit-transform: translateZ(0);}</code>，
+让iscroll下所有的子孙元素都自己搞个layer，那坚决就不闪了。但是这么丑陋的方式有点不能接受，而且每个元素单独一个layer，webkit
+需要维护好每个layer，那个可见哪个不可见，也是一个性能隐患点（iphone5性能太好了，没感觉出来）。</p>
+
+<p>所以还是得想办法找出规律。之前和阿子看过另外一个iscroll闪动的问题（插入节点闪烁），就怀疑和高度有关系。</p>
+
+<h2>设计实验</h2>
+
+<p><a href="http://tedzhou.github.com/demo/flicker/test3d.html">Demo在这</a>
+两个纬度排列组合各种条件，这里直接给结论好了：
+- 若父节点有GPU加速，且高度（包括border）小于1280px，不闪。
+- 若父节点有GPU加速，且高度（包括border）大于1280px，父节点闪</p>
+
+<pre><code>+ 若子节点没有GPU加速，子节点也闪
++ 若子节点有GPU加速，且高度小于1280px,子节点不闪（子节点不闪的部分可以遮挡父节点的闪动）
++ 若子节点有GPU加速，且高度大于1280px,子节点闪
+</code></pre>
+
+<p>所以结论是，如果一个高于1280px的列表(ul)，那么就要让它的列表项(li)加上GPU加速,且要盖住整个列表，那么列表的闪动会被列表项给挡住。
+而且如果列表项本身如果也超过1280px，那就要让他的孙元素盖住它，一直递归下去。</p>
+
+<p>说明一下:1280px这种magic number是我在自己的ip5上的实验值，还没试过其他机器，不能保证每部机都一样。</p>
+
+<h2>关于layer和GPU加速</h2>
+
+<h4>如何看layer</h4>
+
+<p>如图
+<img src="/images/layer.jpg"></p>
+
+<h4>layer:</h4>
+
+<ol>
+<li>It&#8217;s the root object for the page</li>
+<li>It has explicit CSS position properties (relative, absolute or a transform)</li>
+<li>It is transparent</li>
+<li>Has overflow, an alpha mask or reflection</li>
+<li>Has a CSS filter</li>
+<li>Corresponds to <canvas> element that has a 3D (WebGL) context or an accelerated 2D context</li>
+<li>Corresponds to a <video> element</li>
+</ol>
+
+
+<h4>GPU加速:</h4>
+
+<ol>
+<li>Layer has 3D or perspective transform CSS properties</li>
+<li>Layer is used by <video> element using accelerated video decoding</li>
+<li>Layer is used by a <canvas> element with a 3D context or accelerated 2D context</li>
+<li>Layer is used for a composited plugin</li>
+<li>Layer uses a CSS animation for its opacity or uses an animated webkit transform</li>
+<li>Layer uses accelerated CSS filters</li>
+<li>Layer has a descendant that is a compositing layer</li>
+<li>Layer has a sibling with a lower z-index which has a compositing layer (in otherwords the layer is rendered on top of a composited layer)</li>
+</ol>
+
+
+<p><a href="http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome">参考 GPU Accelerated Compositing in Chrome</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -441,6 +549,10 @@ route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/05/safariflickering/">safariflickering</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/03/24/csstest/">csstest</a>

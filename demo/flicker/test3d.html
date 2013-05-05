@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test3D</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="main.css" />
+	<script src="../js/lib/zepto.js"></script>
+	<script>
+		$(function () {
+			$('.J_setHeight').on('click', function (e) {
+				var height = (+$(e.target).text()) + 'px';
+				var parent = $(e.target).parent();
+				parent.height(height);
+				parent.children('.J_txt_H').text(parent.height());
+			});
+			$('.J_normal').on('click', function (e) {
+				var parent = $(e.target).parent();
+				parent.height('auto');
+				parent.children('.J_txt_H').text('normal');
+			});
+			$('.J_toggle3D').on('click', function (e) {
+				var parent = $(e.target).parent();
+				parent.toggleClass('w3d');
+				if (parent.hasClass('w3d')) {
+					parent.children('.J_txt_3D').text('3D');
+				} else {
+					parent.children('.J_txt_3D').text('no3D');
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+<div class="w3d parent">
+
+	<button class="J_setHeight ">1281</button>
+	<br />
+	<button class="J_setHeight ">1280</button>
+
+	<br />
+	<button class="J_setHeight ">1279</button>
+
+	<br />
+	<button class="J_normal ">normalHeight</button>
+
+	<br />
+	<button class="J_toggle3D ">toggle3D</button>
+
+	<br />
+
+	height:<span class="J_txt_H">normal</span>
+
+	<p class="J_txt_3D ">3D</p>
+
+	<div class="son">
+
+		<button class="J_setHeight ">1281</button>
+		<br />
+		<button class="J_setHeight ">1280</button>
+
+		<br />
+		<button class="J_setHeight ">1279</button>
+
+		<br />
+		<button class="J_normal ">normalHeight</button>
+
+		<br />
+		<button class="J_toggle3D ">toggle3D</button>
+
+		height:<span class="J_txt_H">normal</span>
+
+		<p class="J_txt_3D ">no3D</p>
+	</div>
+	<div class="son">
+
+		<button class="J_setHeight ">1281</button>
+		<br />
+		<button class="J_setHeight ">1280</button>
+
+		<br />
+		<button class="J_setHeight ">1279</button>
+
+		<br />
+		<button class="J_normal ">normalHeight</button>
+
+		<br />
+		<button class="J_toggle3D ">toggle3D</button>
+
+		height:<span class="J_txt_H">normal</span>
+
+		<p class="J_txt_3D ">no3D</p>
+	</div>
+	<div class="son">
+
+		<button class="J_setHeight ">1281</button>
+		<br />
+		<button class="J_setHeight ">1280</button>
+
+		<br />
+		<button class="J_setHeight ">1279</button>
+
+		<br />
+		<button class="J_normal ">normalHeight</button>
+
+		<br />
+		<button class="J_toggle3D ">toggle3D</button>
+
+		height:<span class="J_txt_H">normal</span>
+
+		<p class="J_txt_3D ">no3D</p>
+	</div>
+	<div class="son">
+
+		<button class="J_setHeight ">1281</button>
+		<br />
+		<button class="J_setHeight ">1280</button>
+
+		<br />
+		<button class="J_setHeight ">1279</button>
+
+		<br />
+		<button class="J_normal ">normalHeight</button>
+
+		<br />
+		<button class="J_toggle3D ">toggle3D</button>
+
+		height:<span class="J_txt_H">normal</span>
+
+		<p class="J_txt_3D ">no3D</p>
+	</div>
+</div>
+</body>
+</html>
