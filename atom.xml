@@ -4,7 +4,7 @@
   <title><![CDATA[Tedz]]></title>
   <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
-  <updated>2013-05-05T23:50:54+08:00</updated>
+  <updated>2013-05-05T23:53:43+08:00</updated>
   <id>http://tedzhou.github.com/</id>
   <author>
     <name><![CDATA[tedzhou]]></name>
@@ -64,7 +64,7 @@ layer，所以网上很多朋友都指出说可能是这个layer太大，导致�
 <p>如图
 <img src="http://tedzhou.github.com/images/layer.jpg"></p>
 
-<h4>layer:</h4>
+<h4>怎样让元素单独成layer:</h4>
 
 <ol>
 <li>It&#8217;s the root object for the page</li>
@@ -77,7 +77,7 @@ layer，所以网上很多朋友都指出说可能是这个layer太大，导致�
 </ol>
 
 
-<h4>GPU加速:</h4>
+<h4>layer怎么开GPU加速:</h4>
 
 <ol>
 <li>Layer has 3D or perspective transform CSS properties</li>
