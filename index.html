@@ -9,9 +9,9 @@
   <meta name="author" content="tedzhou">
 
   
-  <meta name="description" content="背景 主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
+  <meta name="description" content="Safari 里CSS GPU加速下闪动的bug 背景 主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
 1. 页面初始化时闪动
-2. 按home键再回到safari iscroll为了加快滚动速度，使用了会开启gpu加速的属性-webkit-transform: translateZ(0); &hellip;">
+2. 按home键再回到safari iscroll为了加快滚动速度，使用了会开启gpu加速的属性-webkit-transform: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,7 +72,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/05/05/safariflickering/">Safari 里CSS GPU加速下闪动的bug</a></h1>
+      <h1 class="entry-title"><a href="/blog/2013/05/05/safariflickering/">Safariflickering</a></h1>
     
     
       <p class="meta">
@@ -88,14 +88,16 @@
   
 
 
-<time datetime="2013-05-05T22:48:00+08:00" pubdate data-updated="true">May 5<span>th</span>, 2013</time>
+<time datetime="2013-05-05T00:00:00+08:00" pubdate data-updated="true">May 5<span>th</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>背景</h2>
+  <div class="entry-content"><h1>Safari 里CSS GPU加速下闪动的bug</h1>
+
+<h2>背景</h2>
 
 <p>主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
 1. 页面初始化时闪动
@@ -132,7 +134,9 @@ layer，所以网上很多朋友都指出说可能是这个layer太大，导致�
 <p>所以结论是，如果一个高于1280px的列表(ul)，那么就要让它的列表项(li)加上GPU加速,且要盖住整个列表，那么列表的闪动会被列表项给挡住。
 而且如果列表项本身如果也超过1280px，那就要让他的孙元素盖住它，一直递归下去。</p>
 
-<p>说明一下:1280px这种magic number是我在自己的ip5上的实验值，还没试过其他机器，不能保证每部机都一样。</p>
+<p>说明一下:1280px这种magic number是我在自己的ip5上的实验值，还没试过其他机器，不能保证每部机都一样。
+这种结论还是有些无奈，目前的解决方案基本属于哪里闪往哪里加上<code>-webkit-transform: translateZ(0);</code>
+归根道理都是iscroll启用了gpu加速导致的，后续研究直接用<code>position:absolute</code>来定位，如果性能影响不大，干脆绝对定位好了一了百了。</p>
 
 <h2>关于layer和GPU加速</h2>
 
@@ -553,7 +557,7 @@ route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2013/05/05/safariflickering/">Safari 里CSS GPU加速下闪动的bug</a>
+        <a href="/blog/2013/05/05/safariflickering/">Safariflickering</a>
       </li>
     
       <li class="post">
