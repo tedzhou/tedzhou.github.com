@@ -4,7 +4,7 @@
   <title><![CDATA[Tedz]]></title>
   <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
   <link href="http://tedzhou.github.com/"/>
-  <updated>2013-05-06T17:21:01+08:00</updated>
+  <updated>2013-05-17T21:45:45+08:00</updated>
   <id>http://tedzhou.github.com/</id>
   <author>
     <name><![CDATA[tedzhou]]></name>
@@ -12,6 +12,113 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[小白看Node的异步执行]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/05/17/node/"/>
+    <updated>2013-05-17T21:33:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/05/17/node</id>
+    <content type="html"><![CDATA[<h1>PRE</h1>
+
+<pre><code>翻电脑居然能找到上年在小组分享的东东。上年作为个刚毕业的屌丝，对node还算感兴趣。初生牛犊不怕死，居然敢分享这个口水多多的话题。
+现在还是备份下吧，免得后面找不到了
+现在看来还是有挺多错误的地方，后面找个时间“再来一瓶”
+
+nodejs能做什么就不罗嗦了，在座各位比我都熟悉。我主要是讲述下我对node的异步执行的看法。
+</code></pre>
+
+<h1>一、回顾下大学课本学的知识：</h1>
+
+<p><img src="http://tedzhou.github.com/images/node_thread.jpg"></p>
+
+<p>线程或进程有以上几种状态（除了开始和挂掉）：运行是当线程获得CPU的时候执行任务的状态。由于要有并发的效果，所以不能让某一线程把所有任务处理完才换出CPU，但时间片用完后，还没执行完任务的线程会回到就绪队列里面，这算是就绪状态。但线程在进行某些慢速IO的时候，不需要CPU资源，主动让出CPU退到等待队列中，这个时候是等待状态。等待状态的线程是不能自己唤醒自己的，要别的线程要唤醒。</p>
+
+<p>了解了这些基本知识后，我们看下这段代码：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>fs.readFile('test.js', function(e,o) {
+</span><span class='line'>    console.log('done!!!');
+</span><span class='line'>});
+</span><span class='line'>
+</span><span class='line'>console.log('done???');</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我表示这段代码很长一段时间内我都是无法理解的，因为JS一直被认为是单线程的语言，在这个线程里面它既要去做IO操作的同时(并发)执行<code>console.log('done???')</code>;这不科学啊，而且在某个时刻还会有人告诉这个线程IO完成了，去执行回调吧。同样的疑惑在我没有接触node之前也是有的，比如xhr发出请求后，尼玛就回调了。</p>
+
+<p>当然，后来也听说了js在执行上是单线程，IO这些还是有多线程在支持的，也就一知半解的相信了。在node出来后，而且node也是开源的情况下，我觉得要去看个究竟..</p>
+
+<h1>二、传统时代的异步执行</h1>
+
+<p>在介绍node的异步机制之前，先看看传统时代的异步执行，以前的异步大多是这样的（那些“使设备内核有信号、使事件内核有信号”的名词就不用了）：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ReadFile('file1',...,'async');
+</span><span class='line'>// do Something
+</span><span class='line'>ReadFile('file2',...,'async');
+</span><span class='line'>// do Something else
+</span><span class='line'>var result1 = Waitfor...();
+</span><span class='line'>// do Something with the Result1;
+</span><span class='line'>var result2 = Waitfor...();
+</span><span class='line'>// do Something with the Result1;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这端代码告诉操作系统，这个<code>ReadFile</code>是异步的，操作系统会有其他线程去处理IO，同时允许现在的线程继续执行，不需要阻塞。然后在处理完一些其他事情后，本线程想知道IO到底完成了没有，所以它主动让出CPU，等待IO完成后别的线程唤醒它。</p>
+
+<p>这种方式的缺陷在于，过多的并发线程会让CPU忙于调度而导致性能降低。</p>
+
+<h1>三、Node的异步</h1>
+
+<p>那node是怎么处理异步的？万变不离其宗，还是发出IO请求立即返回，处理完其他事情后主动阻塞，等待其他线程的唤醒，再处理回调。而不一样的地方是实现的方式更加优雅和高效。</p>
+
+<p>Node在windows平台使用的是IOCP，IOCP是个提供了个机制，对并发的最大线程数是有限制的。
+1. 首先创建一个IOCP会附带几个数据结构，比较重要的是等待的线程队列和IO完成队列。
+2. 当一个设备的IO操作完成了，系统会向IO完成队列加入一个完成项。
+3. 当一个线程要得到IO完成信息的，可以调用<code>GetQueueCompleteStatus</code>方法，该进程将阻塞，系统将线程放入等待的线程队列里面。如果此时IO
+完成队列已有完成项目，那么就唤醒等待线程队列里的线程。</p>
+
+<p>创建IOCP的时候可以指定一个最大并发线程数，当正在运行的线程大于或等于最大并发数时，不能再启动其他线程。</p>
+
+<p>事实上，并非启动的线程越多越好，因为CPU能同时处理的线程和CPU的核数有关，更多的线程启动了也只会放入就绪队列，且正在运行的线程还没完成的时候，因为时间片用完了，会做上下文切换调度其他线程而把目前的线程放入就绪队列，导致在线程调度上花费时间。如果创建的线程少，则更少的切换。</p>
+
+<p>现在看下node的这里的具体操作：</p>
+
+<p><img src="http://tedzhou.github.com/images/main_thread.jpg"></p>
+
+<p>当执行<code>fs.read</code>的时候，首先会创建一个iocp对象，然后调用uv_fs_read，这个方法主要作用是在线程池里面加入IO任务。</p>
+
+<p><code>QueueUserWorkItem</code>会在有多余线程的情况下启动线程执行IO任务（在运行的线程数小于指定的最大并发数的情况下）。</p>
+
+<p>这时主线程没有阻塞而直接返回执行下面的js代码。直到没有其他代码执行的时候，会调用<code>GetQueueCompletionStauts</code>
+接口，主动阻塞，系统把主线程放入等待队列。</p>
+
+<p>在某个时刻，IO完成了，系统在IO完成队列添加完成项，发现等待队列中还有等待线程，则唤醒等待线程，执行回调函数。</p>
+
+<p>如果回调函数里面还有其他IO操作，则再次调用<code>QueueUserWorkItem</code>，把任务放入线程池，再继续<code>GetQueueCompletionStauts</code>
+阻塞，实现一个循环。</p>
+
+<h1>四、其他疑惑</h1>
+
+<p>1、最大并发数是多少合适？
+理论上讲，是CPU核数为理想值，原因是有多少个核，可以同时运行多少个线程。但是在<code>libuv</code>的源码中，我看到实现的iocp的最大并发数为1,
+难道是为了避免死锁？有待后续看看。
+2、最大并发数设为1，会不会有问题？
+最大并发数是最大运行的线程数目，不是线程池的数目（而且有时运行的线程数是可以大于并发数）。当node进行io操作的时候，该线程会很快阻塞掉，那么其他线程还是可以运行的。只是这样效率高么？
+3、非IO操作的异步如何实现？
+在源码中看到适合loop里面的各种watchers有关，以后再探讨。
+4、我想要同步的IO肿么办？</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Safariflickering]]></title>
