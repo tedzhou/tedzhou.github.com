@@ -7,9 +7,10 @@
 	<meta name="author" content="tedzhou">
 
 	
-	<meta name="description" content="PRE 翻电脑居然能找到上年在小组分享的东东。上年作为个刚毕业的屌丝，对node还算感兴趣。初生牛犊不怕死，居然敢分享这个口水多多的话题。
-现在还是备份下吧，免得后面找不到了
-现在看来还是有挺多错误的地方，后面找个时间“再来一瓶” nodejs能做什么就不罗嗦了，在座各位比我都熟悉。 &hellip;">
+	<meta name="description" content="简述 就是touchstart后300毫秒左右，webkit会在你touch的位置生成一个click事件。
+后果是，如果你tap了某个按钮，然后页面结构变化了，click事件很可能落在其他元素上。
+如果在原来tap的位置上出现了个a标签，页面那就会跳走了。
+如果在原来的位置出现个input， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -74,6 +75,86 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/21/tapclick/">
+		
+			开发touch遇到的坑之二:还是tap和click</a>
+	</h2>
+	<div class="entry-content">
+		<h1>简述</h1>
+
+<p>就是<code>touchstart</code>后300毫秒左右，webkit会在你touch的位置生成一个<code>click</code>事件。
+后果是，如果你tap了某个按钮，然后页面结构变化了，<code>click</code>事件很可能落在其他元素上。
+如果在原来tap的位置上出现了个<code>a标签</code>，页面那就会跳走了。
+如果在原来的位置出现个<code>input</code>，<code>input框</code>那就会被focus了。</p>
+
+<p>我们称这个问题为<code>点击穿透</code></p>
+
+<h1>解决办法</h1>
+
+<ol>
+<li>不要用tap，统一用click事件。</li>
+<li>tap事件后500ms后，等click出来后，再做dom相关的操作。（这其实就有点多余了，就是想要响应更快才用tap嘛！）</li>
+<li>参考google <a href="https://developers.google.com/mobile/articles/fast_buttons?hl=zh-CN">fastbutton</a>的思路。</li>
+</ol>
+
+
+<h1>fastbutton的思路</h1>
+
+<p><code>fastbutton</code>本身不是用来解决<code>点击穿透</code>的。它的出现的背景是因为浏览器对touch
+系列事件的命中率太低，如果按钮本身很小的话，怎么点都不容易触发，而click
+事件触发比touch事件慢300ms，但按钮再小一点中了一定能触发。<a href="http://tedzhou.github.io/blog/2012/12/22/tap/">参考很久前我的另一篇文章的研究</a>
+&#8216;fastbutton&#8217;是想把两个事件统一起来，结合两者的优点，先监听tap，如果tap命中了，那么就放弃click事件。如果tap
+没有命中，至少300ms后还有<code>click</code>。</p>
+
+<h1>fastbutton也遇到了这个问题</h1>
+
+<p>当toustart命中后要去除后面的click handler，否则绑定的事件会执行两次？但怎么不让后面的click执行？如果preventDefault
+的话，那么scroll事件也会收到影响，页面有可能就滚不懂了。所以fastbutton的办法是touchstart执行了，然后在body上绑上click事件</p>
+
+<pre><code>`document.addEventListener('click', google.clickbuster.onClick, true);`
+</code></pre>
+
+<p>这里请留意第三个参数，是true哦，表示在capture的时候执行onclick，这个时候在handler里面判断下event
+的坐标，如果和上次点的位置一样（表明是多余的），那<code>stopPropagation</code>和<code>preventDefautl</code>什么的随便搞。这样那个多余的click就不会下来了。</p>
+
+<p>为了不影响后面的正常<code>click</code>，<code>fastbutton</code>只在<code>touchstart</code>后的<code>2.5s</code>进行这个判断。(2
+.5s也不知道google为啥这么搞，感觉太长了)</p>
+
+<h1>如何借鉴</h1>
+
+<p>其实基本就照抄了。<code>touchstart</code>后2.5s秒之内再来个同样坐标的click事件，就干掉你。
+因为我们现在触屏新老框架一起使用中，还没法直接使用<code>fastbutton</code>。为了根治这货、方便使用，还需要在zepto里面进行hack。
+这个后续进行</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-21T21:23:00+08:00" pubdate data-updated="true">May 21<span>st</span>, 2013</time></div>
+	<div class="tags">
+
+</div>
+	
+</div></article>
 
 
     <article class="post">
