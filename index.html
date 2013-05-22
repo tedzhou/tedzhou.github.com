@@ -128,8 +128,111 @@
 <h1>如何借鉴</h1>
 
 <p>其实基本就照抄了。<code>touchstart</code>后2.5s秒之内再来个同样坐标的click事件，就干掉你。
-因为我们现在触屏新老框架一起使用中，还没法直接使用<code>fastbutton</code>。为了根治这货、方便使用，还需要在zepto里面进行hack。
-这个后续进行</p>
+因为我们现在触屏新老框架一起使用中，还没法直接使用<code>fastbutton</code>。为了根治这货、方便使用，还需要在zepto里面进行hack。</p>
+
+<p>以下代码是参考<code>fastbutton</code>改了一下的, 在zepto的touch事件里面加上一个<code>ghostClick</code>对象来管理</p>
+
+<figure class='code'><figcaption><span>[hack in zepto] []</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="kd">var</span> <span class="nx">ghostClick</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">_coordinates</span><span class="o">:</span><span class="p">[],</span>
+</span><span class='line'>      <span class="nx">mark</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span> <span class="p">,</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="p">){</span>
+</span><span class='line'>          <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="o">:</span><span class="nx">el</span><span class="p">});</span>
+</span><span class='line'>          <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>              <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">unmark</span><span class="p">();</span>
+</span><span class='line'>              <span class="c1">// 这1000ms是经验值</span>
+</span><span class='line'>          <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">unmark</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">onClick</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coordinate</span><span class="p">){</span>
+</span><span class='line'>              <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">x</span><span class="p">;</span>
+</span><span class='line'>              <span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+</span><span class='line'>              <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">el</span><span class="p">;</span>
+</span><span class='line'>              <span class="c1">// 坐标一样，target却不一样，你妹还不是穿透了？</span>
+</span><span class='line'>              <span class="k">if</span> <span class="p">(</span><span class="nx">el</span> <span class="o">!=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientX</span> <span class="o">-</span> <span class="nx">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">25</span> <span class="o">&amp;&amp;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientY</span> <span class="o">-</span> <span class="nx">y</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+</span><span class='line'>                  <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>          <span class="p">});</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">onClick</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后在zepto的touchend的handler里面mark下当前的坐标:</p>
+
+<figure class='code'><figcaption><span>[hack in zepto] []</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;touchend&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+</span><span class='line'>        <span class="nx">cancelLongTap</span><span class="p">();</span>
+</span><span class='line'>        <span class="cm">/** 干掉ghostClick**/</span>
+</span><span class='line'>        <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">mark</span><span class="p">(</span><span class="nx">touch</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">y1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span><span class='line'>        <span class="cm">/**</span>
+</span><span class='line'><span class="cm">          * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">          */</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">     */</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>实际上就是在touchend的时候记录一下坐标和target，然后在全局监听click事件，如果1000ms内click触发了坐标一样，target
+却不一样,</p>
+
+<pre><code>`if (el != event.target &amp;&amp; Math.abs(event.clientX - x) &lt; 25 &amp;&amp; Math.abs(event.clientY - y) &lt; 25)`
+</code></pre>
+
+<p>那么我们认为是这个click是多余的，直接就<code>stopPropagation</code>和<code>preventDefault</code>了。</p>
+
+<p>简单的demo<a href="http://tedzhou.github.io/demo/preventGhostClick/index.html">在此</a></p>
 
 		
 		

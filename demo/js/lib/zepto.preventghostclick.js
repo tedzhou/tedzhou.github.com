@@ -1304,8 +1304,8 @@ window.Zepto = Zepto
 			this._coordinates.push({x:x, y:y, el:el});
 			window.setTimeout(function(){
 				ghostClick.unmark();
-				// 这500ms是经验值
-			}, 500);
+				// 这1000ms是经验值
+			}, 1000);
 		},
 		unmark:function(){
 			return this._coordinates.pop();
