@@ -160,6 +160,8 @@
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="kd">var</span> <span class="nx">ghostClick</span> <span class="o">=</span> <span class="p">{</span>
 </span><span class='line'>      <span class="nx">_coordinates</span><span class="o">:</span><span class="p">[],</span>
 </span><span class='line'>      <span class="nx">mark</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span> <span class="p">,</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="p">){</span>
@@ -172,7 +174,7 @@
 </span><span class='line'>      <span class="nx">unmark</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span>
 </span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
 </span><span class='line'>      <span class="p">},</span>
-</span><span class='line'>      <span class="nx">onClick</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">onMouseDown</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>          <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coordinate</span><span class="p">){</span>
 </span><span class='line'>              <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">x</span><span class="p">;</span>
 </span><span class='line'>              <span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
@@ -186,7 +188,9 @@
 </span><span class='line'>      <span class="p">}</span>
 </span><span class='line'>  <span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">onClick</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span><span class='line'>  <span class="c1">// 事件触发顺序 mousedown-&gt;focus-&gt;mouseup-&gt;click</span>
+</span><span class='line'>  <span class="c1">// 如果不想focus，那就mousedown吧</span>
+</span><span class='line'>  <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">onMouseDown</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
