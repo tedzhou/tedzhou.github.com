@@ -1298,33 +1298,36 @@ window.Zepto = Zepto
 		if (longTapTimeout) clearTimeout(longTapTimeout)
 		longTapTimeout = null
 	}
-	var ghostClick = {
-		_coordinates:[],
-		mark:function(x ,y, el){
-			this._coordinates.push({x:x, y:y, el:el});
-			window.setTimeout(function(){
-				ghostClick.unmark();
-				// 这1000ms是经验值
-			}, 1000);
-		},
-		unmark:function(){
-			return this._coordinates.pop();
-		},
-		onClick:function(event) {
-			ghostClick._coordinates.forEach(function(coordinate){
-				var x = coordinate.x;
-				var y = coordinate.y;
-				var el = coordinate.el;
-				// 坐标一样，target却不一样，你妹还不是穿透了？
-				if (el != event.target && Math.abs(event.clientX - x) < 25 && Math.abs(event.clientY - y) < 25) {
-					event.stopPropagation();
-					event.preventDefault();
-				}
-			});
-		}
-	};
 
-	document.addEventListener('click', ghostClick.onClick, true);
+    /** 干掉ghostClick**/
+    var ghostClick = {
+        _coordinates:[],
+        mark:function(x ,y, el){
+            this._coordinates.push({x:x, y:y, el:el});
+            window.setTimeout(function(){
+                ghostClick.unmark();
+                // 这1000ms是经验值
+            }, 1000);
+        },
+        unmark:function(){
+            return this._coordinates.shift();
+        },
+        onMouseDown:function(event) {
+            ghostClick._coordinates.forEach(function(coordinate){
+                var x = coordinate.x;
+                var y = coordinate.y;
+                var el = coordinate.el;
+                // 坐标一样，target却不一样，你妹还不是穿透了？
+                if (el != event.target) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+            });
+        }
+    };
+    // mousedown->focus->mouseup->click
+    // 如果不想focus，那就mousedown吧
+    document.addEventListener('mousedown', ghostClick.onMouseDown, true);
 
 	$(document).ready(function(){
 		var now, delta
