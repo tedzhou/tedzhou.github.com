@@ -170,7 +170,7 @@
 </span><span class='line'>          <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
 </span><span class='line'>      <span class="p">},</span>
 </span><span class='line'>      <span class="nx">unmark</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+</span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
 </span><span class='line'>      <span class="p">},</span>
 </span><span class='line'>      <span class="nx">onClick</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>          <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coordinate</span><span class="p">){</span>
@@ -208,19 +208,19 @@
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * 这里省略好多代码</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;touchend&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
-</span><span class='line'>        <span class="nx">cancelLongTap</span><span class="p">();</span>
-</span><span class='line'>        <span class="cm">/** 干掉ghostClick**/</span>
-</span><span class='line'>        <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">mark</span><span class="p">(</span><span class="nx">touch</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">y1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
-</span><span class='line'>        <span class="cm">/**</span>
-</span><span class='line'><span class="cm">          * 这里省略好多代码</span>
-</span><span class='line'><span class="cm">          */</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * 这里省略好多代码</span>
-</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'><span class="cm">            * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">            */</span>
+</span><span class='line'>           <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;touchend&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+</span><span class='line'>               <span class="nx">cancelLongTap</span><span class="p">();</span>
+</span><span class='line'>               <span class="cm">/** 干掉ghostClick**/</span>
+</span><span class='line'>               <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">mark</span><span class="p">(</span><span class="nx">touch</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">y1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span><span class='line'>               <span class="cm">/**</span>
+</span><span class='line'><span class="cm">                 * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">                 */</span>
+</span><span class='line'>           <span class="p">});</span>
+</span><span class='line'>           <span class="cm">/**</span>
+</span><span class='line'><span class="cm">            * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">            */</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
