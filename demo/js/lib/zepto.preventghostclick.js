@@ -1304,7 +1304,8 @@ window.Zepto = Zepto
 			this._coordinates.push({x:x, y:y, el:el});
 			window.setTimeout(function(){
 				ghostClick.unmark();
-			}, 1000);
+				// 这500ms是经验值
+			}, 500);
 		},
 		unmark:function(){
 			return this._coordinates.pop();
@@ -1315,7 +1316,7 @@ window.Zepto = Zepto
 				var y = coordinate.y;
 				var el = coordinate.el;
 				// 坐标一样，target却不一样，你妹还不是穿透了？
-				if (Math.abs(event.clientX - x) < 25 && Math.abs(event.clientY - y) < 25 && el != event.target) {
+				if (el != event.target && Math.abs(event.clientX - x) < 25 && Math.abs(event.clientY - y) < 25) {
 					event.stopPropagation();
 					event.preventDefault();
 				}
@@ -1345,7 +1346,7 @@ window.Zepto = Zepto
 			}).bind('touchend', function(e){
 				cancelLongTap()
 
-				/** 干掉ghostClcik**/
+				/** 干掉ghostClick**/
 				ghostClick.mark(touch.x1, touch.y1, touch.el[0]);
 
 				// double tap (tapped twice within 250ms)
