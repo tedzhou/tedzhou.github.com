@@ -1298,6 +1298,32 @@ window.Zepto = Zepto
 		if (longTapTimeout) clearTimeout(longTapTimeout)
 		longTapTimeout = null
 	}
+	var ghostClick = {
+		_coordinates:[],
+		mark:function(x ,y, el){
+			this._coordinates.push({x:x, y:y, el:el});
+			window.setTimeout(function(){
+				ghostClick.unmark();
+			}, 1000);
+		},
+		unmark:function(){
+			return this._coordinates.pop();
+		},
+		onClick:function(event) {
+			this._coordinates.forEach(function(coordinate){
+				var x = coordinate.x;
+				var y = coordinate.y;
+				var el = coordinate.el;
+				// 坐标一样，target却不一样，你妹还不是穿透了？
+				if (Math.abs(event.clientX - x) < 25 && Math.abs(event.clientY - y) < 25 && el != event.target) {
+					event.stopPropagation();
+					event.preventDefault();
+				}
+			});
+		}
+	};
+
+//	document.addEventListener('click', ghostClick.onClick, true);
 
 	$(document).ready(function(){
 		var now, delta
@@ -1318,6 +1344,9 @@ window.Zepto = Zepto
 				touch.y2 = e.touches[0].pageY
 			}).bind('touchend', function(e){
 				cancelLongTap()
+
+				/** 干掉ghostClcik**/
+//				ghostClick.mark(touch.x1, touch.y1, touch.el);
 
 				// double tap (tapped twice within 250ms)
 				if (touch.isDoubleTap) {

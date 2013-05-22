@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="../js/lib/zepto.preventghostclick.js"></script>
+</head>
+<body>
+<div id="a" style="background: rosybrown;height: 30px;" >a</div>
+<div id="b" style="background: blueviolet; height: 30px;">b</div>
+<button id="r">还原</button>
+<div>
+	这个是加了preventghostclick的demo
+	tap了a，把a隐藏了。那么b就会在tap的位置上。
+	在touchend的时候记住touch的位置，如果1500ms内在同一个地方的click事件，会过滤掉。
+	300ms后过来的click事件不会应用到在b上。
+</div>
+<script>
+	$('#a').on('tap', function(){
+		$('#a').hide();
+	});
+	$('#b').on('click', function(){
+		alert('click 了b');
+	});
+	$('#r').on('tap', function(){
+		location.reload();
+	});
+</script>
+</body>
+</html>
