@@ -12,11 +12,11 @@
 	<script src="../js/lib/zepto.preventghostclick.js"></script>
 </head>
 <body>
-<div id="div" style="height:900px;"> 盖着</div>
+<div id="div" style="height:900px;background: rosybrown"> 盖着</div>
 <textarea id="text" style="height:300"></textarea>
 <script>
 	$('#div').on('tap', function(){
-		$('text')[0].focus();
+		$('#text')[0].focus();
 	});
 </script>
 </body>
