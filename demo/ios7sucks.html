@@ -1,0 +1,42 @@
+
+
+<html>
+<head>
+	<title>test</title>
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+<body >
+<div id = "uselessDiv" style="display: none"></div>
+<script>
+	// create 10000 use less div
+	var str = '';
+	for (var i = 0; i < 10; i++) {
+		str += '<div></div>';
+	}
+	document.getElementById('uselessDiv').innerHTML = str;
+</script>
+
+<div id="pg1" style="background:#333; height:7000px;">
+	<p id="p" value="v" style="background:red; height:100px; width:200px;" onclick="return 0;">v</p>
+</div>
+
+<div id="pg2" style="display:none;background:#999; height:9000px;">
+	<textarea style="height:300px;" id="textarea"></textarea>
+</div>
+
+<script>
+
+	var btn = document.getElementById('p');
+	/* btn.addEventListener('touchend', function(){
+	 btn.onclick = hack;
+	 })*/
+	btn.addEventListener('click', function(){
+		var pg1=document.getElementById('pg1');
+		pg1.style.display="none";
+		var pg2=document.getElementById('pg2');
+		pg2.style.display="";
+	});
+
+</script>
+</body>
+</html>
