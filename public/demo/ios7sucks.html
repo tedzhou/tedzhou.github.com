@@ -8,32 +8,34 @@
 <body >
 <div id = "uselessDiv" style="display: none"></div>
 <script>
-	// create 10000 use less div
+	// create 10000 use less divs
 	var str = '';
-	for (var i = 0; i < 10; i++) {
+	for (var i = 0; i < 10000; i++) {
 		str += '<div></div>';
 	}
 	document.getElementById('uselessDiv').innerHTML = str;
 </script>
 
-<div id="pg1" style="background:#333; height:7000px;">
-	<p id="p" value="v" style="background:red; height:100px; width:200px;" onclick="return 0;">v</p>
+<div id="pg1" style="background:#333;">
+	<p id="btn" style="background:#fca355; height:100px; width:100%;" onclick="return 0;">there is a p element with a onclick attribute to make element clickable in safari</p>
 </div>
-
-<div id="pg2" style="display:none;background:#999; height:9000px;">
-	<textarea style="height:300px;" id="textarea"></textarea>
+<div id="pg2" style="display:none;background:#999;">
+	<textarea style="height:300px;width:100%;" id="textarea"></textarea>
 </div>
+<p>click the `button` aboved, then click the textarea, safari freeze!</p>
+<p>more elements there are(10000 here), longer the browser freezing take..</p>
+<br>
+<p>
+	problem solved by reducing the nums of elements, or using the real `button` element instead of `p` as a clickable button.
+</p>
 
 <script>
 
-	var btn = document.getElementById('p');
-	/* btn.addEventListener('touchend', function(){
-	 btn.onclick = hack;
-	 })*/
+	var btn = document.getElementById('btn');
+	var pg1=document.getElementById('pg1');
+	var pg2=document.getElementById('pg2');
 	btn.addEventListener('click', function(){
-		var pg1=document.getElementById('pg1');
 		pg1.style.display="none";
-		var pg2=document.getElementById('pg2');
 		pg2.style.display="";
 	});
 
