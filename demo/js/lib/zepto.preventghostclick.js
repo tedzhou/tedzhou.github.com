@@ -1307,27 +1307,31 @@ window.Zepto = Zepto
             window.setTimeout(function(){
                 ghostClick.unmark();
                 // 这1000ms是经验值
-            }, 1000);
+            }, 2000);
         },
         unmark:function(){
             return this._coordinates.shift();
         },
         onMouseDown:function(event) {
+//			debugger;
+			console.log(event.type);
             ghostClick._coordinates.forEach(function(coordinate){
                 var x = coordinate.x;
                 var y = coordinate.y;
                 var el = coordinate.el;
+				console.log(el,event.target,event.type);
                 // 坐标一样，target却不一样，你妹还不是穿透了？
-                if (el != event.target) {
+				if (el != event.target && Math.abs(event.clientX - x) < 25 && Math.abs(event.clientY - y) < 25 ) {
                     event.stopPropagation();
                     event.preventDefault();
+					console.log('stoped', event.type);
                 }
             });
         }
     };
     // mousedown->focus->mouseup->click
-    // 如果不想focus，那就mousedown吧
-    document.addEventListener('mousedown', ghostClick.onMouseDown, true);
+//    如果不想focus，那就mousedown吧
+	document.addEventListener('mousedown', ghostClick.onMouseDown, true);
 
 	$(document).ready(function(){
 		var now, delta
