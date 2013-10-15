@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>tap test</title>
+    <meta name="description" content="">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script type="text/javascript" src="./js/lib/zepto.js"></script>
+    <style>
+        a {background:red;}
+    </style>
+</head>
+<body>
+
+
+<h1>Delegate</h1>
+<button onclick="useTouchStart()">useTouchStart</button>
+<button onclick="useTap()">useTap</button>
+<div id = "zepto" style="text-align:center;">
+
+    <h2>Href javascript:;</h2>
+
+    <a href="javascript:mylog('href');" style="font-size:10px;">10</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:12px;">12</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:14px;">14</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:16px;">16</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:18px;">18</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:20px;">20</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:22px;">22</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:24px;">24</a>
+
+    <hr>
+    <hr>
+
+    <h2>NO Href</h2>
+    <a  style="font-size:10px;">10</a>
+    <hr>
+    <a  style="font-size:12px;">12</a>
+    <hr>
+    <a  style="font-size:14px;">14</a>
+    <hr>
+    <a  style="font-size:16px;">16</a>
+    <hr>
+    <a  style="font-size:18px;">18</a>
+    <hr>
+    <a  style="font-size:20px;">20</a>
+    <hr>
+    <a  style="font-size:22px;">22</a>
+    <hr>
+    <a  style="font-size:24px;">24</a>
+
+    <hr>
+    <hr>
+
+    <h2> padding:10px </h2>
+    <a href="javascript:;" style="font-size:10px;padding:10px">10</a>
+    <hr>
+    <a href="javascript:;" style="font-size:12px;padding:10px">12</a>
+    <hr>
+    <a href="javascript:;" style="font-size:14px;padding:10px">14</a>
+    <hr>
+    <a href="javascript:;" style="font-size:16px;padding:10px">16</a>
+    <hr>
+    <a href="javascript:;" style="font-size:18px;padding:10px">18</a>
+    <hr>
+    <a href="javascript:;" style="font-size:20px;padding:10px">20</a>
+    <hr>
+    <a href="javascript:;" style="font-size:22px;padding:10px">22</a>
+    <hr>
+    <a href="javascript:;" style="font-size:24px;padding:10px">24</a>
+</div>
+
+
+
+<h1>no delegate. touchstart href</h1>
+<div id = "noDelegate" style="text-align:center;">
+
+    <a href="javascript:mylog('href');" style="font-size:10px;" ontouchstart="mylog('touchstart')">10</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:12px;" ontouchstart="mylog('touchstart')">12</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:14px;" ontouchstart="mylog('touchstart')">14</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:16px;" ontouchstart="mylog('touchstart')">16</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:18px;" ontouchstart="mylog('touchstart')">18</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:20px;" ontouchstart="mylog('touchstart')">20</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:22px;" ontouchstart="mylog('touchstart')">22</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:24px;" ontouchstart="mylog('touchstart')">24</a>
+
+    <hr>
+    <hr>
+</div>
+
+
+<h1>no delegate. click href</h1>
+<div id = "click" style="text-align:center;">
+
+    <a href="javascript:mylog('href');" style="font-size:10px;" onclick="mylog('onclick')">10</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:12px;" onclick="mylog('onclick')">12</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:14px;" onclick="mylog('onclick')">14</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:16px;" onclick="mylog('onclick')">16</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:18px;" onclick="mylog('onclick')">18</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:20px;" onclick="mylog('onclick')">20</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:22px;" onclick="mylog('onclick')">22</a>
+    <hr>
+    <a href="javascript:mylog('href');" style="font-size:24px;" onclick="mylog('onclick')">24</a>
+
+    <hr>
+    <hr>
+</div>
+
+<h1> click and touch</h1>
+<div id = "click" style="text-align:center;">
+
+    <a  style="font-size:10px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">10</a>
+    <hr>
+    <a  style="font-size:12px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">12</a>
+    <hr>
+    <a  style="font-size:14px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">14</a>
+    <hr>
+    <a  style="font-size:16px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">16</a>
+    <hr>
+    <a  style="font-size:18px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">18</a>
+    <hr>
+    <a  style="font-size:20px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">20</a>
+    <hr>
+    <a  style="font-size:22px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">22</a>
+    <hr>
+    <a  style="font-size:24px;" ontouchstart="mylog('ontouchstart');" onclick="mylog('onclick')">24</a>
+
+    <hr>
+    <hr>
+</div>
+
+<div id="logCon">
+<div id="logbroad"></div>
+<button onclick="document.getElementById('logbroad').innerHTML='';" >clear</button>
+</div>
+<script type="text/javascript">
+    var timer;
+    window.onscroll = function (){
+        clearTimeout(timer);
+        timer = setTimeout(function(){
+            document.getElementById('logCon').style.top = document.body.scrollTop +20+ 'px';
+        },500);
+    };
+    var logBroad = document.getElementById('logbroad');
+    document.getElementById('logCon').style.cssText = "display:block; position:absolute; top:20px; right:20px; color:red; background:yellow; border:solid 1px black;";
+    function mylog(msg) {
+        var d = new Date();
+        var p = document.createElement('p');
+        p.innerHTML = '<p>'+ msg + '</p>';
+        logBroad.appendChild(p);
+    }
+</script>
+
+<script>
+    var zep = document.getElementById('zepto');
+
+    function useTouchStart() {
+        Zepto(zep).undelegate('a');
+        Zepto(zep).delegate('a', 'touchstart', function (e) {
+            mylog('touchstart');
+        });
+    }
+
+    function useTap() {
+        Zepto(zep).undelegate('a');
+        Zepto(zep).delegate('a', 'tap', function (e) {
+            mylog('tap');
+        });
+    }
+
+    useTap();
+
+
+</script>
+
+
+</body>
+</html>

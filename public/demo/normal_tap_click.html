@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>normal_tap_click</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<style>
+		a, span {
+			max-width: 100px;
+			min-height: 100px;
+			display: block;
+		}
+
+		.before {
+			background: red;
+		}
+
+		.after {
+			background: #000000;
+		}
+
+		.log {
+			width: 100%;
+		}
+	</style>
+</head>
+<body>
+<div contenteditable="true" id="log">
+	normal:
+</div>
+<h1>touchend->show->click</h1>
+<a class="before" id="before">before</a>
+<a class="after" id="after">after</a>
+
+
+<h1>touchstart->show->click</h1>
+<span class="before" id="touchstart">tapstart_span</span>
+<span class="after" id="click">tapend</span>
+
+<h1>touchstart->show->touchend</h1>
+<a class="before" id="tapstart">tapstart</a>
+<a class="after" id="tapend">tapend</a>
+
+
+<script>
+	var before = document.querySelector('#before');
+	var after = document.querySelector('#after');
+	var log = document.querySelector('#log');
+
+	after.style.display = "none";
+
+	before.addEventListener('touchend', function (e) {
+		before.style.display = "none";
+		after.style.display = "";
+		e.preventDefault();
+
+		log.innerHTML += ('\r\n' + 'touchend红色 + preventDefault');
+		console.log('touchend', e, e.target, this);
+	});
+
+	after.addEventListener('click', function (e) {
+		log.innerHTML += ('\r\n' + 'click到黑色');
+		console.log('click', e, e.target, this);
+	});
+
+</script>
+<script>
+	var touchstart = document.querySelector('#touchstart');
+	var click = document.querySelector('#click');
+	var log = document.querySelector('#log');
+
+	click.style.display = "none";
+	touchstart.addEventListener('touchstart', function (e) {
+		touchstart.style.display = "none";
+		click.style.display = "";
+		log.innerHTML += ('\r\n' + 'touchstart红色');
+		console.log('touchstart', e, e.target, this);
+	});
+
+	click.addEventListener('click', function (e) {
+		log.innerHTML += ('\r\n' + 'click到黑色');
+		console.log('click', e, e.target, this);
+	});
+
+</script>
+<script>
+	var tapstart = document.querySelector('#tapstart');
+	var tapend = document.querySelector('#tapend');
+	var log = document.querySelector('#log');
+
+	tapend.style.display = "none";
+	tapstart.addEventListener('touchstart', function (e) {
+		tapstart.style.display = "none";
+		tapend.style.display = "";
+		log.innerHTML += ('\r\n' + 'touchstart红色');
+		console.log('touchstart', e, e.target, this);
+	});
+
+	tapend.addEventListener('touchend', function (e) {
+		log.innerHTML += ('\r\n' + 'touchend到黑色');
+		console.log('click', e, e.target, this);
+	});
+
+</script>
+
+
+</body>
+</html>

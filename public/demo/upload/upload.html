@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="../js/lib/zepto.preventghostclick.js"></script>
+</head>
+<body>
+
+<input id="fileinput" type="file" multiple="multiple" accept="image/*" value="test"/>
+<div id ="logbroad"></div>
+<script>
+
+
+	function getImageBase64(img, param){
+		param = $.extend({
+			maxW: 800, //目标宽
+			maxH: 800, //目标高
+			quality: 0.85, //目标jpg图片输出质量
+			orien: 1
+		}, param);
+
+		//获取配置
+		var maxW = param.maxW;
+		var maxH = param.maxH;
+
+		var quality = param.quality;
+
+		var naturalWidth = img.naturalWidth;
+		var naturalHeight = img.naturalHeight;
+
+		var aimWidth;
+		var aimHeight; //图片目标大小
+
+		// 对宽大于高的图片，在10000x640的范围内，做AspectFit缩放。
+		if(naturalWidth > naturalHeight) {
+			maxW = param.maxH;
+			maxH = param.maxW;
+		}
+
+		//获取最终生成图片大小
+		if (naturalWidth > maxW && naturalWidth / naturalHeight >= maxW / maxH) {
+			aimWidth = maxW;
+			aimHeight = naturalHeight * maxW / naturalWidth;
+		} else if (naturalHeight > maxH && naturalHeight / naturalWidth >= maxH / maxW) {
+			aimWidth = naturalWidth * maxH / naturalHeight;
+			aimHeight = maxH;
+		} else {
+			aimWidth = naturalWidth;
+			aimHeight = naturalHeight;
+		}
+
+		//canvas临时工具
+		var canvas = document.createElement('canvas');
+		var ctx = canvas.getContext('2d');
+		var base64Str;
+		transformCT(canvas, aimWidth, aimHeight, param.orien);
+		ctx.drawImage(img, 0, 0, naturalWidth, naturalHeight, 0, 0, aimWidth, aimHeight);
+		base64Str = canvas.toDataURL('image/jpeg', quality);
+		return base64Str;
+	}
+
+
+
+
+	 function transformCT (canvas, width, height, orientation) {
+		if (orientation >= 5 && orientation <= 8) {
+			canvas.width = height;
+			canvas.height = width;
+		} else {
+			canvas.width = width;
+			canvas.height = height;
+		}
+		var ctx = canvas.getContext('2d');
+		switch (orientation) {
+			case 2:
+				// horizontal flip
+				ctx.translate(width, 0);
+				ctx.scale(-1, 1);
+				break;
+			case 3:
+				// 180 rotate left
+				ctx.translate(width, height);
+				ctx.rotate(Math.PI);
+				break;
+			case 4:
+				// vertical flip
+				ctx.translate(0, height);
+				ctx.scale(1, -1);
+				break;
+			case 5:
+				// vertical flip + 90 rotate right
+				ctx.rotate(0.5 * Math.PI);
+				ctx.scale(1, -1);
+				break;
+			case 6:
+				// 90 rotate right
+				ctx.rotate(0.5 * Math.PI);
+				ctx.translate(0, -height);
+				break;
+			case 7:
+				// horizontal flip + 90 rotate right
+				ctx.rotate(0.5 * Math.PI);
+				ctx.translate(width, -height);
+				ctx.scale(-1, 1);
+				break;
+			case 8:
+				// 90 rotate left
+				ctx.rotate(-0.5 * Math.PI);
+				ctx.translate(-width, 0);
+				break;
+			default:
+				break;
+		}
+	}
+
+
+	function compress(dataUrl,param,callback) {
+		var img = new Image();
+		img.onload = function (event) {
+			var base64 = getImageBase64(this, param);
+			var data = $.extend({},{param:param});
+			data.dataUrl = dataUrl;
+			data.base64 = base64;
+			data.naturalSize = {
+				width: img.naturalWidth,
+				height: img.naturalHeight
+			};
+			callback(null, data);
+		};
+		img.onerror = function (event) {
+			callback(new Error('图片无法解析'), null);
+		};
+		img.src = dataUrl;
+	}
+
+
+	function getImageMeta(file, callback) {
+		var r = new FileReader();
+		var err = null;
+		var meta = null;
+
+		r.onload = function(event) {
+			callback(err, meta);
+		};
+		r.onerror = function(event) {
+			callback(event.target.error, meta);
+		};
+		r.readAsBinaryString(file);
+	}
+
+	function getImageURL (file, callback){
+		var r = new FileReader();
+
+		r.onload = function(event) {
+			callback(null, event.target.result);
+		};
+		r.onerror = function(event) {
+			callback(event.target.error, null);
+		};
+		r.readAsDataURL(file);
+	}
+
+
+
+	function getImageData(file, picParam, callback) {
+		if (!file) {
+			return;
+		}
+		// 不传参数当作屌丝机器
+		var param = $.extend({}, picParam);
+		getImageURL(file, function(err, dataUrl) {
+			if(err){
+				callback(new Error('拿不到URL'), null);
+			} else {
+				compress(dataUrl, param, callback);
+			}
+		});
+	}
+
+	$(document.body).on('doubletap', function(){
+		$('#logbroad').toggle();
+	});
+	$('#fileinput').on('change', function() {
+		$.each(this.files, function(i, file){
+			getImageData(file,{}, function(err, data){
+				if(err) {
+					console.log(err);
+				} else {
+					$(document.body).append('<img src="'+data.base64+'"/>');
+				}
+			});
+		})
+	})
+</script>
+</body>
+</html>

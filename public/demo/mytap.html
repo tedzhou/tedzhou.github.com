@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>normal_tap_click</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<style>
+		a, span {
+			max-width: 100px;
+			min-height: 100px;
+			display: block;
+		}
+
+		.before {
+			background: red;
+		}
+
+		.after {
+			background: #000000;
+		}
+
+		.log {
+			width: 100%;
+		}
+	</style>
+</head>
+<body>
+<div contenteditable="true" id="log">
+	normal:
+</div>
+<h1>touchend->->preventDefault->show->click</h1>
+<a class="before" id="before">before</a>
+<a class="after" id="after">after</a>
+
+
+<h1>touchend->->show->click</h1>
+<a class="before" id="nbefore">before</a>
+<a class="after" id="nafter">after</a>
+
+<h1>normal</h1>
+<a class="before" id="xbefore">before</a>
+
+<div id="log"></div>
+<script>
+	function getEl(s) {
+		return document.querySelector(s)
+	}
+	var before = getEl('#before');
+	var after = getEl('#after');
+	var log = getEl('#log');
+
+	after.style.display = "none";
+
+	function writeLog(s) {
+		log.innerHTML += ('<p>' + s + '</p>');
+	}
+	before.addEventListener('touchend', function (e) {
+
+		e.preventDefault();
+		writeLog('prevent before.');
+
+		writeLog('touchend before.');
+		before.style.display = "none";
+		after.style.display = "";
+		writeLog('toggle display.');
+
+		var target = e.target;
+		// display none之后不能触发事件
+
+		if (window.getComputedStyle(target, null)['display'] != "none") {
+			var point = e.changedTouches[0] || e;
+			var ev = document.createEvent('MouseEvents');
+			ev.initMouseEvent('click', true, true, e.view, 1,
+					point.screenX, point.screenY, point.clientX, point.clientY,
+					e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+					0, null);
+			ev._fake = true;
+			writeLog('init a fake click before.');
+			target.dispatchEvent(ev);
+		}
+	});
+
+	before.addEventListener('click', function (e) {
+		writeLog('click before.');
+	});
+
+	after.addEventListener('click', function (e) {
+		writeLog('click after.');
+	});
+
+	// 没有preventDefault
+	var nbefore = getEl('#nbefore');
+	var nafter = getEl('#nafter');
+
+	nafter.style.display = "none";
+
+	nbefore.addEventListener('touchend', function (e) {
+		writeLog('touchend nbefore.');
+		nbefore.style.display = "none";
+		nafter.style.display = "";
+		writeLog('toggle display.');
+	});
+
+	nbefore.addEventListener('click', function (e) {
+		writeLog('click nbefore.');
+	});
+
+	nafter.addEventListener('click', function (e) {
+
+		writeLog('wtf.' + e.target.style.display + '$');
+		writeLog('click nafter.');
+	});
+
+	var xbefore = getEl('#xbefore');
+	xbefore.addEventListener('touchend', function (e) {
+		before.focus();
+		e.preventDefault();
+		e.cancelBubble = true;
+		e.stopPropagation();
+		writeLog('prevent xbefore.');
+
+		writeLog('touchend xbefore.');
+		writeLog('!!!!!!!!!!init a fake click xbefore.');
+		var target = e.target;
+		// display none之后不能触发事件
+
+//		if (window.getComputedStyle(target, null)['display'] != "none") {
+//			var point = e.changedTouches[0] || e;
+//			var ev = document.createEvent('MouseEvents');
+//			ev.initMouseEvent('click', true, true, e.view, 1,
+//					0, 0, 0, 0,
+//					e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+//					0, null);
+//			ev._fake = true;
+		writeLog('!!!!!!!!!!init a fake click xbefore.');
+//			target.dispatchEvent(ev);
+//		}
+	});
+
+	xbefore.addEventListener('click', function (e) {
+		writeLog('click xbefore.');
+	});
+
+</script>
+</body>
+</html>

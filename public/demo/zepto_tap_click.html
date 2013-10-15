@@ -1,0 +1,88 @@
+﻿﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>zepto_tap_click</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<style>
+		a {
+			max-width: 100px;
+			min-height: 100px;
+			display: block;
+		}
+
+		.before {
+			background: red;
+		}
+
+		.after {
+			background: black;
+		}
+
+		.log {
+			width: 100%;
+		}
+	</style>
+
+	<script type="text/javascript" src="./js/lib/zepto.js"></script>
+	<script>
+		var Z = Zepto;
+		Z(document.body).on('tap', '.before', function (e) {
+			Z('#Zbefore').hide();
+			Z('#Zafter').show();
+			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到红色');
+			console.log('tap', e, e.target, this);
+		});
+
+		Z(document.body).on('click', '.after', function (e) {
+			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到黑色');
+			console.log('click', e, e.target, this);
+		});
+
+		Z(document.body).on('tap', '.after', function (e) {
+			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到黑色');
+			console.log('click', e, e.target, this);
+		});
+
+		Z(document.body).on('click', '.Z_click', function (e) {
+			Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到Z_delegate_Click');
+		});
+
+		Z(function () {
+			Z('#Zafter').hide();
+//			Z('#Zbefore').on('tap', function (e) {
+//				Z('#Zbefore').hide();
+//				Z('#Zafter').show();
+//				Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'tap到红色');
+//				console.log('tap', e, e.target, this);
+//			});
+//
+//			Z('#Zafter').on('click', function (e) {
+//				Z('#Zlog').html(Z('#Zlog').html() + '\r\n' + 'click到黑色');
+//				console.log('click', e, e.target, this);
+//			});
+
+		});
+	</script>
+</head>
+<body>
+<h1>zepto</h1>
+<a class="before" id="Zbefore">Zbefore</a>
+<a class="after" id="Zafter">Zafter</a>
+<br />
+
+<div class="Z_click" style="background: black;">
+	Z_delegate_Click
+</div>
+<div contenteditable="true" id="Zlog">
+	zepto:
+</div>
+
+</body>
+</html>

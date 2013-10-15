@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>jq_tap_click</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<style>
+		a {
+			max-width: 100px;
+			min-height: 100px;
+			display: block;
+		}
+
+		.before {
+			background: red;
+		}
+
+		.after {
+			background: #000000;
+		}
+
+		.log {
+			width: 100%;
+		}
+	</style>
+	<script type="text/javascript" src="./js/lib/jq.js"></script>
+	<script type="text/javascript" src="./js/lib/jm.js"></script>
+	<script>
+		var JQ = jQuery;
+		JQ(function () {
+			JQ('#JQafter').hide();
+			JQ('#JQbefore').on('tap', function (e) {
+				JQ('#JQbefore').hide();
+				JQ('#JQafter').show();
+				JQ('#JQlog').html(JQ('#JQlog').html() + '\r\n' + 'tap到红色');
+				console.log('tap', e, e.target, this);
+			});
+
+			JQ('#JQafter').on('click', function (e) {
+				JQ('#JQlog').html(JQ('#JQlog').html() + '\r\n' + 'click到黑色');
+				console.log('click', e, e.target, this);
+			});
+		});
+
+	</script>
+</head>
+<body>
+
+<h1>jq</h1>
+<a class="before" id="JQbefore">JQbefore</a>
+<a class="after" id="JQafter">JQafter</a>
+
+
+<div contenteditable="true" id="JQlog">
+	jq:
+</div>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=320,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<script src="../js/lib/zepto.preventghostclick.js"></script>
+</head>
+<body>
+<div id="a" style="background: rosybrown;height: 90px;" >a</div>
+<div id="b" style="background: blueviolet; height: 90px;">b</div>
+<button id="r">还原</button>
+<div>
+	这个是加了preventghostclick的demo
+	tap了a，把a隐藏了。那么b就会在tap的位置上。
+	在touchend的时候记住touch的位置，如果1500ms内在同一个地方的click事件，会过滤掉。
+	300ms后过来的click事件不会应用到在b上。
+</div>
+<script>
+	$('#a').on('tap', function(){
+		$('#a').hide();
+	});
+	$('#b').on('click', function(){
+		alert('click 了b');
+	});
+	$('#r').on('tap', function(){
+		location.reload();
+	});
+</script>
+</body>
+</html>

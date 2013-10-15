@@ -1,0 +1,13 @@
+html{padding:0;margin: 0}
+
+.w3d {
+	-webkit-transform: translateZ(0);
+}
+
+.parent {
+	background: plum;
+}
+
+.son {
+	background: #add8e6;
+}

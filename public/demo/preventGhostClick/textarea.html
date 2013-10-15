@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<textarea id="t"></textarea>
+<script>
+	document.addEventListener('focus', function (event) {
+		console.log('1')
+		event.preventDefault();
+		event.stopPropagation();
+		event.stopPropagation();
+		return false;
+	}, true);
+	document.getElementById('t').addEventListener('focus', function (event) {
+		console.log('self');
+		event.preventDefault();
+		event.stopPropagation();
+		return false;
+	});
+</script>
+
+</body>
+</html>
