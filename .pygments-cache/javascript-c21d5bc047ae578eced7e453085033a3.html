@@ -1,0 +1,16 @@
+<div class="highlight"><pre>    <span class="cm">/**</span>
+<span class="cm">     * 这里省略好多代码</span>
+<span class="cm">     */</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;touchend&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+        <span class="nx">cancelLongTap</span><span class="p">();</span>
+        <span class="cm">/** 干掉ghostClick**/</span>
+        <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">mark</span><span class="p">(</span><span class="nx">touch</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">y1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="cm">/**</span>
+<span class="cm">          * 这里省略好多代码</span>
+<span class="cm">          */</span>
+    <span class="p">});</span>
+    <span class="cm">/**</span>
+<span class="cm">     * 这里省略好多代码</span>
+<span class="cm">     */</span>
+</pre>
+</div>

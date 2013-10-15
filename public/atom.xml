@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tedz]]></title>
+  <link href="http://tedzhou.github.com/atom.xml" rel="self"/>
+  <link href="http://tedzhou.github.com/"/>
+  <updated>2013-06-02T15:21:35+08:00</updated>
+  <id>http://tedzhou.github.com/</id>
+  <author>
+    <name><![CDATA[tedzhou]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[开发touch遇到的坑之二:还是tap和click]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/05/21/tapclick/"/>
+    <updated>2013-05-21T21:23:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/05/21/tapclick</id>
+    <content type="html"><![CDATA[<h1>简述</h1>
+
+<p>就是<code>touchstart</code>后300毫秒左右，webkit会在你touch的位置生成一个<code>click</code>事件。
+后果是，如果你tap了某个按钮，然后页面结构变化了，<code>click</code>事件很可能落在其他元素上。
+如果在原来tap的位置上出现了个<code>a标签</code>，页面那就会跳走了。
+如果在原来的位置出现个<code>input</code>，<code>input框</code>那就会被focus了。</p>
+
+<p>我们称这个问题为<code>点击穿透</code></p>
+
+<h1>解决办法</h1>
+
+<ol>
+<li>不要用tap，统一用click事件。</li>
+<li>tap事件后500ms后，等click出来后，再做dom相关的操作。（这其实就有点多余了，就是想要响应更快才用tap嘛！）</li>
+<li>参考google <a href="https://developers.google.com/mobile/articles/fast_buttons?hl=zh-CN">fastbutton</a>的思路。</li>
+</ol>
+
+
+<h1>fastbutton的思路</h1>
+
+<p><code>fastbutton</code>本身不是用来解决<code>点击穿透</code>的。它的出现的背景是因为浏览器对touch
+系列事件的命中率太低，如果按钮本身很小的话，怎么点都不容易触发，而click
+事件触发比touch事件慢300ms，但按钮再小一点中了一定能触发。<a href="http://tedzhou.github.io/blog/2012/12/22/tap/">参考很久前我的另一篇文章的研究</a>
+&#8216;fastbutton&#8217;是想把两个事件统一起来，结合两者的优点，先监听tap，如果tap命中了，那么就放弃click事件。如果tap
+没有命中，至少300ms后还有<code>click</code>。</p>
+
+<h1>fastbutton也遇到了这个问题</h1>
+
+<p>当toustart命中后要去除后面的click handler，否则绑定的事件会执行两次？但怎么不让后面的click执行？如果preventDefault
+的话，那么scroll事件也会收到影响，页面有可能就滚不懂了。所以fastbutton的办法是touchstart执行了，然后在body上绑上click事件</p>
+
+<pre><code>`document.addEventListener('click', google.clickbuster.onClick, true);`
+</code></pre>
+
+<p>这里请留意第三个参数，是true哦，表示在capture的时候执行onclick，这个时候在handler里面判断下event
+的坐标，如果和上次点的位置一样（表明是多余的），那<code>stopPropagation</code>和<code>preventDefautl</code>什么的随便搞。这样那个多余的click就不会下来了。</p>
+
+<p>为了不影响后面的正常<code>click</code>，<code>fastbutton</code>只在<code>touchstart</code>后的<code>2.5s</code>进行这个判断。(2
+.5s也不知道google为啥这么搞，感觉太长了)</p>
+
+<h1>如何借鉴</h1>
+
+<p>其实基本就照抄了。<code>touchstart</code>后2.5s秒之内再来个同样坐标的click事件，就干掉你。
+因为我们现在触屏新老框架一起使用中，还没法直接使用<code>fastbutton</code>。为了根治这货、方便使用，还需要在zepto里面进行hack。</p>
+
+<p>以下代码是参考<code>fastbutton</code>改了一下的, 在zepto的touch事件里面加上一个<code>ghostClick</code>对象来管理</p>
+
+<figure class='code'><figcaption><span>[hack in zepto] []</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="kd">var</span> <span class="nx">ghostClick</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">_coordinates</span><span class="o">:</span><span class="p">[],</span>
+</span><span class='line'>      <span class="nx">mark</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span> <span class="p">,</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="p">){</span>
+</span><span class='line'>          <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="o">:</span><span class="nx">el</span><span class="p">});</span>
+</span><span class='line'>          <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>              <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">unmark</span><span class="p">();</span>
+</span><span class='line'>              <span class="c1">// 这1000ms是经验值</span>
+</span><span class='line'>          <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">unmark</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">onMouseDown</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coordinate</span><span class="p">){</span>
+</span><span class='line'>              <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">x</span><span class="p">;</span>
+</span><span class='line'>              <span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+</span><span class='line'>              <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">el</span><span class="p">;</span>
+</span><span class='line'>              <span class="c1">// 坐标一样，target却不一样，你妹还不是穿透了？</span>
+</span><span class='line'>              <span class="k">if</span> <span class="p">(</span><span class="nx">el</span> <span class="o">!=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientX</span> <span class="o">-</span> <span class="nx">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">25</span> <span class="o">&amp;&amp;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientY</span> <span class="o">-</span> <span class="nx">y</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+</span><span class='line'>                  <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>          <span class="p">});</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// 事件触发顺序 mousedown-&gt;focus-&gt;mouseup-&gt;click</span>
+</span><span class='line'>  <span class="c1">// 如果不想focus，那就mousedown吧</span>
+</span><span class='line'>  <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">onMouseDown</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后在zepto的touchend的handler里面mark下当前的坐标:</p>
+
+<figure class='code'><figcaption><span>[hack in zepto] []</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">            * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">            */</span>
+</span><span class='line'>           <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;touchend&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+</span><span class='line'>               <span class="nx">cancelLongTap</span><span class="p">();</span>
+</span><span class='line'>               <span class="cm">/** 干掉ghostClick**/</span>
+</span><span class='line'>               <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">mark</span><span class="p">(</span><span class="nx">touch</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">y1</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span><span class='line'>               <span class="cm">/**</span>
+</span><span class='line'><span class="cm">                 * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">                 */</span>
+</span><span class='line'>           <span class="p">});</span>
+</span><span class='line'>           <span class="cm">/**</span>
+</span><span class='line'><span class="cm">            * 这里省略好多代码</span>
+</span><span class='line'><span class="cm">            */</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>实际上就是在touchend的时候记录一下坐标和target，然后在全局监听click事件，如果1000ms内click触发了坐标一样，target
+却不一样,</p>
+
+<pre><code>`if (el != event.target &amp;&amp; Math.abs(event.clientX - x) &lt; 25 &amp;&amp; Math.abs(event.clientY - y) &lt; 25)`
+</code></pre>
+
+<p>那么我们认为是这个click是多余的，直接就<code>stopPropagation</code>和<code>preventDefault</code>了。</p>
+
+<p>简单的demo<a href="http://tedzhou.github.io/demo/preventGhostClick/index.html">在此</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[小白看Node的异步执行]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/05/17/node/"/>
+    <updated>2013-05-17T21:33:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/05/17/node</id>
+    <content type="html"><![CDATA[<h1>PRE</h1>
+
+<pre><code>翻电脑居然能找到上年在小组分享的东东。上年作为个刚毕业的屌丝，对node还算感兴趣。初生牛犊不怕死，居然敢分享这个口水多多的话题。
+现在还是备份下吧，免得后面找不到了
+现在看来还是有挺多错误的地方，后面找个时间“再来一瓶”
+
+nodejs能做什么就不罗嗦了，在座各位比我都熟悉。我主要是讲述下我对node的异步执行的看法。
+</code></pre>
+
+<h1>一、回顾下大学课本学的知识：</h1>
+
+<p><img src="http://tedzhou.github.com/images/node_thread.jpg"></p>
+
+<p>线程或进程有以上几种状态（除了开始和挂掉）：运行是当线程获得CPU的时候执行任务的状态。由于要有并发的效果，所以不能让某一线程把所有任务处理完才换出CPU，但时间片用完后，还没执行完任务的线程会回到就绪队列里面，这算是就绪状态。但线程在进行某些慢速IO的时候，不需要CPU资源，主动让出CPU退到等待队列中，这个时候是等待状态。等待状态的线程是不能自己唤醒自己的，要别的线程要唤醒。</p>
+
+<p>了解了这些基本知识后，我们看下这段代码：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>fs.readFile('test.js', function(e,o) {
+</span><span class='line'>    console.log('done!!!');
+</span><span class='line'>});
+</span><span class='line'>
+</span><span class='line'>console.log('done???');</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我表示这段代码很长一段时间内我都是无法理解的，因为JS一直被认为是单线程的语言，在这个线程里面它既要去做IO操作的同时(并发)执行<code>console.log('done???')</code>;这不科学啊，而且在某个时刻还会有人告诉这个线程IO完成了，去执行回调吧。同样的疑惑在我没有接触node之前也是有的，比如xhr发出请求后，尼玛就回调了。</p>
+
+<p>当然，后来也听说了js在执行上是单线程，IO这些还是有多线程在支持的，也就一知半解的相信了。在node出来后，而且node也是开源的情况下，我觉得要去看个究竟..</p>
+
+<h1>二、传统时代的异步执行</h1>
+
+<p>在介绍node的异步机制之前，先看看传统时代的异步执行，以前的异步大多是这样的（那些“使设备内核有信号、使事件内核有信号”的名词就不用了）：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ReadFile('file1',...,'async');
+</span><span class='line'>// do Something
+</span><span class='line'>ReadFile('file2',...,'async');
+</span><span class='line'>// do Something else
+</span><span class='line'>var result1 = Waitfor...();
+</span><span class='line'>// do Something with the Result1;
+</span><span class='line'>var result2 = Waitfor...();
+</span><span class='line'>// do Something with the Result1;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这端代码告诉操作系统，这个<code>ReadFile</code>是异步的，操作系统会有其他线程去处理IO，同时允许现在的线程继续执行，不需要阻塞。然后在处理完一些其他事情后，本线程想知道IO到底完成了没有，所以它主动让出CPU，等待IO完成后别的线程唤醒它。</p>
+
+<p>这种方式的缺陷在于，过多的并发线程会让CPU忙于调度而导致性能降低。</p>
+
+<h1>三、Node的异步</h1>
+
+<p>那node是怎么处理异步的？万变不离其宗，还是发出IO请求立即返回，处理完其他事情后主动阻塞，等待其他线程的唤醒，再处理回调。而不一样的地方是实现的方式更加优雅和高效。</p>
+
+<p>Node在windows平台使用的是IOCP，IOCP是个提供了个机制，对并发的最大线程数是有限制的。
+1. 首先创建一个IOCP会附带几个数据结构，比较重要的是等待的线程队列和IO完成队列。
+2. 当一个设备的IO操作完成了，系统会向IO完成队列加入一个完成项。
+3. 当一个线程要得到IO完成信息的，可以调用<code>GetQueueCompleteStatus</code>方法，该进程将阻塞，系统将线程放入等待的线程队列里面。如果此时IO
+完成队列已有完成项目，那么就唤醒等待线程队列里的线程。</p>
+
+<p>创建IOCP的时候可以指定一个最大并发线程数，当正在运行的线程大于或等于最大并发数时，不能再启动其他线程。</p>
+
+<p>事实上，并非启动的线程越多越好，因为CPU能同时处理的线程和CPU的核数有关，更多的线程启动了也只会放入就绪队列，且正在运行的线程还没完成的时候，因为时间片用完了，会做上下文切换调度其他线程而把目前的线程放入就绪队列，导致在线程调度上花费时间。如果创建的线程少，则更少的切换。</p>
+
+<p>现在看下node的这里的具体操作：</p>
+
+<p><img src="http://tedzhou.github.com/images/main_thread.jpg"></p>
+
+<p>当执行<code>fs.read</code>的时候，首先会创建一个iocp对象，然后调用uv_fs_read，这个方法主要作用是在线程池里面加入IO任务。</p>
+
+<p><code>QueueUserWorkItem</code>会在有多余线程的情况下启动线程执行IO任务（在运行的线程数小于指定的最大并发数的情况下）。</p>
+
+<p>这时主线程没有阻塞而直接返回执行下面的js代码。直到没有其他代码执行的时候，会调用<code>GetQueueCompletionStauts</code>
+接口，主动阻塞，系统把主线程放入等待队列。</p>
+
+<p>在某个时刻，IO完成了，系统在IO完成队列添加完成项，发现等待队列中还有等待线程，则唤醒等待线程，执行回调函数。</p>
+
+<p>如果回调函数里面还有其他IO操作，则再次调用<code>QueueUserWorkItem</code>，把任务放入线程池，再继续<code>GetQueueCompletionStauts</code>
+阻塞，实现一个循环。</p>
+
+<h1>四、其他疑惑</h1>
+
+<p>1、最大并发数是多少合适？
+理论上讲，是CPU核数为理想值，原因是有多少个核，可以同时运行多少个线程。但是在<code>libuv</code>的源码中，我看到实现的iocp的最大并发数为1,
+难道是为了避免死锁？有待后续看看。
+2、最大并发数设为1，会不会有问题？
+最大并发数是最大运行的线程数目，不是线程池的数目（而且有时运行的线程数是可以大于并发数）。当node进行io操作的时候，该线程会很快阻塞掉，那么其他线程还是可以运行的。只是这样效率高么？
+3、非IO操作的异步如何实现？
+在源码中看到适合loop里面的各种watchers有关，以后再探讨。
+4、我想要同步的IO肿么办？</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Safariflickering]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/05/05/safariflickering/"/>
+    <updated>2013-05-05T00:00:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/05/05/safariflickering</id>
+    <content type="html"><![CDATA[<h1>Safari 里CSS GPU加速下闪动的bug</h1>
+
+<h2>背景</h2>
+
+<p>主要出现的场景是应用了iscroll后，页面会有各种闪动，主要是下面两种：
+1. 页面初始化时闪动
+2. 按home键再回到safari</p>
+
+<p>iscroll为了加快滚动速度，使用了会开启gpu加速的属性<code>-webkit-transform: translateZ(0);</code>
+gpu加速会使webkit单独为这个render tree分配一个compositing
+layer，所以网上很多朋友都指出说可能是这个layer太大，导致渲染有bug。提出的解决思路是以毒攻毒，为iscroll下的子元素都设上<code>-webkit
+-transform: translateZ(0);</code>，让子元素也有自己的layer，单独渲染就不会闪动了。</p>
+
+<p>这个思路确实有用，但是在我们使用场景里面发现一级子元素不闪了，部分孙元素还在闪。然后我们再给孙元素加上，发现还有其他后代元素会闪。
+一怒之下，写了个<code>#scrllor * {-webkit-transform: translateZ(0);}</code>，
+让iscroll下所有的子孙元素都自己搞个layer，那坚决就不闪了。但是这么丑陋的方式有点不能接受，而且每个元素单独一个layer，webkit
+需要维护好每个layer，那个可见哪个不可见，也是一个性能隐患点（iphone5性能太好了，没感觉出来）。</p>
+
+<p>所以还是得想办法找出规律。之前和阿子看过另外一个iscroll闪动的问题（插入节点闪烁），就怀疑和高度有关系。</p>
+
+<h2>设计实验</h2>
+
+<p><a href="http://tedzhou.github.com/demo/flicker/test3d.html">Demo在这</a>
+两个纬度排列组合各种条件，这里直接给结论好了:</p>
+
+<h4>若父节点有GPU加速，且高度（包括border）小于1280px，不闪。</h4>
+
+<h4>若父节点有GPU加速，且高度（包括border）大于1280px，父节点闪，子节点分一下情况:</h4>
+
+<ol>
+<li>若子节点没有GPU加速，子节点也闪</li>
+<li>若子节点有GPU加速，且高度小于1280px,子节点不闪（子节点不闪的部分可以遮挡父节点的闪动）</li>
+<li>若子节点有GPU加速，且高度大于1280px,子节点闪</li>
+</ol>
+
+
+<p>所以结论是，如果一个高于1280px的列表(ul)，那么就要让它的列表项(li)加上GPU加速,且要盖住整个列表，那么列表的闪动会被列表项给挡住。
+而且如果列表项本身如果也超过1280px，那就要让他的孙元素盖住它，一直递归下去。</p>
+
+<p>说明一下:1280px这种magic number是我在自己的ip5上的实验值，还没试过其他机器，不能保证每部机都一样。
+这种结论还是有些无奈，目前的解决方案基本属于哪里闪往哪里加上<code>-webkit-transform: translateZ(0);</code>
+归根道理都是iscroll启用了gpu加速导致的，后续研究直接用<code>position:absolute</code>来定位，如果性能影响不大，干脆绝对定位好了一了百了。</p>
+
+<h2>关于layer和GPU加速</h2>
+
+<h4>如何看layer</h4>
+
+<p>如图
+<img src="http://tedzhou.github.com/images/layer.jpg"></p>
+
+<h4>怎样让元素单独成layer:</h4>
+
+<ol>
+<li>It&#8217;s the root object for the page</li>
+<li>It has explicit CSS position properties (relative, absolute or a transform)</li>
+<li>It is transparent</li>
+<li>Has overflow, an alpha mask or reflection</li>
+<li>Has a CSS filter</li>
+<li>Corresponds to <code>&lt;canvas&gt;</code> element that has a 3D (WebGL) context or an accelerated 2D context</li>
+<li>Corresponds to a <code>&lt;video&gt;</code> element</li>
+</ol>
+
+
+<h4>layer怎么开GPU加速:</h4>
+
+<ol>
+<li>Layer has 3D or perspective transform CSS properties</li>
+<li>Layer is used by <code>&lt;video&gt;</code> element using accelerated video decoding</li>
+<li>Layer is used by a <code>&lt;canvas&gt;</code> element with a 3D context or accelerated 2D context</li>
+<li>Layer is used for a composited plugin</li>
+<li>Layer uses a CSS animation for its opacity or uses an animated webkit transform</li>
+<li>Layer uses accelerated CSS filters</li>
+<li>Layer has a descendant that is a compositing layer</li>
+<li>Layer has a sibling with a lower z-index which has a compositing layer (in otherwords the layer is rendered on top of a composited layer)</li>
+</ol>
+
+
+<p><a href="http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome">参考 GPU Accelerated Compositing in Chrome</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[csstest]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/03/24/csstest/"/>
+    <updated>2013-03-24T23:55:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/03/24/csstest</id>
+    <content type="html"><![CDATA[<h1>cssTest工具失败经历记录</h1>
+
+<h2>背景</h2>
+
+<p>之前和龙哥一起做了个导航条优化的需求，修改了导航条顶部导航的html结构和样式。过程中发现js代码没有改动的滚动的逻辑，新导航上了之后在android
+的chrome 上<em>滚动</em>卡的EB，Webview 中也有些卡顿，但没有chrome 里卡。这是我第一次意识到chrome也会卡，那chrome 和webview
+可能不是用同一套渲染模型（当然大部分情景chrome是快多了的）。当时龙哥把几个臭名远瞩的<em>css属性</em>(<code>box-shadow</code>/<code>border-radius</code>)
+干掉后立马就不那么卡了。</p>
+
+<p>这使我有想法去监控下是什么样式改动会导致滚动变卡，毕竟触屏是个大项目，css样式也不少，大海捞针明显不科学。尽管PC上chrome的dev
+tools很好用，却没能告诉开发者究竟是哪一行样式是性能瓶颈。我大海捞针在google找办法，终于找到一个<a href="http://andy.edinborough.org/CSS-Stress-Testing-and-Performance-Profiling">通过js模拟滚动的监控思路</a>。</p>
+
+<h2>思路</h2>
+
+<p><a href="http://andy.edinborough.org/CSS-Stress-Testing-and-Performance-Profiling">原文</a>
+作者的思路是遍历所有dom元素，去掉每个<code>dom</code>元素的<code>id</code>和<code>css-class</code>，然后用js设置<code>window
+.scrollBy</code>去模拟滚动，然后记录<em>滚动时间/滚动的帧数</em>(不是准确的帧数，只是onscroll触发的次数）现在为了方便记<em>滚动时间/滚动的帧数</em>为<code>spf</code>，为了不和<code>fps</code>搞混，故意反过来写，当然<code>spf</code>越小越好。如果去掉某个css-class后<code>spf</code>明显变小，则说明这个css样式产生了不好的影响。</p>
+
+<p>借鉴这个思路，我做了这个cssTest工具，有一下几个修改：
+1. 我的目的是找出某一条css属性影响了性能，如果通过id和css-class来遍历会相对笼统。所以我遍历所有css属性，每次把所有dom
+的某一条属性还原为默认值，然后滚动测试<code>spf</code>。
+2. 原工具是上下来回滚动100px，那页面下面的某些元素却没有被渲染，不准。所以改成从上到下每次滚1px，滚3000ms。
+3. 提供对比功能，输入某个css属性，试验出原样式和样式修改后的差别。</p>
+
+<h2>实验结果</h2>
+
+<h3>PC的Chrome</h3>
+
+<p>在PC上的实验结果真的让我以为找到了<em>答案</em>。
+如图，<code>==base==</code>为原始的样式。去掉<code>position:fixed</code>后的<code>spf</code>和<code>==base==</code>甚至小了3、4
+倍！而且这个实验结果也是符合预期的，<code>position:fixed</code>对滚动性能的影响也是众所周知的差了（[参见: Google I/O 2012 ]
+(http://www.youtube.com/embed/hAzhayTnhEI?rel=0)）。</p>
+
+<p><img src="http://tedzhou.github.com/images/pc_chrome.jpg"></p>
+
+<p>而且排第二差的是一个用来治疗ios图片加载闪屏的属性，android上用不上的css属性（其实ios上也没达到正常疗效），那么干掉它就能达到提升性能的目的了！当然，必须要在手机上有同样的表现才有证明这个工具works。</p>
+
+<h3>手机上的Chrome</h3>
+
+<p>手机上的Chrome同样找出了<code>position:fixed</code>的<code>spf</code>比<code>==base==</code>小1倍，也符合预期。</p>
+
+<p><img src="http://tedzhou.github.com/images/mobile_chrome.jpg"></p>
+
+<p>为了验证这个工具能找出<code>position:fixed</code>之外的性能瓶颈，我
+把之前龙哥去掉的<code>box-shadow</code>加上，也能查出来。那就表示这个工具还真有用！</p>
+
+<p><img src="http://tedzhou.github.com/images/mobile_chrome_boxshadow.jpg"></p>
+
+<h3>webview</h3>
+
+<p>目前触屏项目访问量最多的入口就是在webview，而且用户投诉也是集中在webview上。但在webview的测试结果却呈现出完全无规律的状态。<code>spf
+</code>没有明显小的也没有明显大的。说明在webview里面，这个思路行不通。</p>
+
+<p><img src="http://tedzhou.github.com/images/mobile_webview.jpg"></p>
+
+<h2>分析模型失败的原因</h2>
+
+<p>原因其实很简单，我假象的浏览器渲染模型是:用户触发滚动->页面渲染->触发scroll事件。
+只要记录下一段时间内的scroll触发的次数就可以估出页面渲染的性能，因为css样式渲染慢了，scroll事件就触发得少。但缺陷就在于js触发的滚动
+浏览器不保证每次会去渲染，有可能就直接触发scroll事件了。
+但PC上还是有一定规律可循的，会在连续scroll n次之后渲染一次，那么css样式影响渲染还是可以体现出来。</p>
+
+<p>但在webview就完全没有规律了。由此可以猜想webview和chrome的渲染方式不一样，参考<a href="http://www.chromium.org/developers/design-documents/rendering-architecture-diagrams">Rendering Architecture Diagrams</a>
+。chrome用的是<code>Composited GPU rendering</code> 那么webview也许是<code>software
+rendering</code>。有一个有趣的是，如果在页面放上<code>box-shadow</code>，手机的chrome反而比webview要忙，因为<a href="http://aerotwist.com/blog/on-translate3d-and-layer-creation-hacks/">Where things get
+really messy is on mobile devices, because they have comparatively limited VRAM, and it becomes easy to exhaust that and end up with excruciatingly poor rendering performance</a></p>
+
+<h2>总结</h2>
+
+<p>cssTest工具没有成功，让我对纯js监控css性能产生了怀疑。希望能自己包装webview，在webview里直接监控css的fps
+。虽然已经有了查看fps的应用，因为要去掉每个css样式，再记录fps，现有的fps还是不够用的。</p>
+
+<h2>source code</h2>
+
+<p><a href="https://github.com/tedzhou/csstest/blob/master/csstest.js">放在github</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[about_tracing]]></title>
+    <link href="http://tedzhou.github.com/blog/2013/01/23/about-tracing/"/>
+    <updated>2013-01-23T19:27:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2013/01/23/about-tracing</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[proxy]]></title>
+    <link href="http://tedzhou.github.com/blog/2012/12/28/proxy/"/>
+    <updated>2012-12-28T20:17:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2012/12/28/proxy</id>
+    <content type="html"><![CDATA[<h1>一键代理</h1>
+
+<hr />
+
+<h2>目的</h2>
+
+<hr />
+
+<p>android 2.3没有全局的代理机制，手机上调试太困难。 所以这个工具的目的就是让android 2.3手机上使用PC上的fiddler来做代理工具。</p>
+
+<hr />
+
+<h2>实现</h2>
+
+<hr />
+
+<p>android上虽然没有全局代理，但是每个连接实际上都被防火墙(<a href="http://www.netfilter.org/"><code>iptables</code></a>)截获，那么在防火墙上监听<code>80端口</code>，然后转发到PC上的<code>fiddle</code>就好了。可惜iptables只能把包转发到本机，那么可以在android手机上运行一个进程，监听某个端口，<code>iptables</code>把包转到那端口，再由改进程把包转到PC的<code>80端口</code>。</p>
+
+<h3>adb工具</h3>
+
+<hr />
+
+<p>adb全称是<a href="http://developer.android.com/tools/help/adb.html">Android Debug Bridge</a>。
+允许PC通过usb数据线调试android手机，我们利用adb来进行手机与PC的通信。</p>
+
+<h3>iptables</h3>
+
+<hr />
+
+<p>iptables贯穿整个网络传输流程，这里只关注出口监控，只要是将要从80端口发出的都是我们需要代理的包。</p>
+
+<pre><code>adb shell /tedproxy/iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to 8123
+</code></pre>
+
+<p>通过以上代码即可实现80端口的包都转到8123上。</p>
+
+<h3>redsocks</h3>
+
+<hr />
+
+<p>redsocks 是开源的包转发工具。进行一下配置就可以监听8123端口的数据包，然后转发到<code>10.55.58.111:8888</code>上，一般是fiddler。</p>
+
+<pre><code>```
+redsocks {
+    local_ip = 127.0.0.1;
+    local_port = 8123;
+    ip = 10.66.58.111;
+    port = 8888;
+    type = http-relay;
+}
+```
+</code></pre>
+
+<p>这里需要利用下adb工具，因为每次开机pc的ip地址都是不一样的，那么每次都要手动填写配置是相当麻烦的，
+所以这里我们用adb工具来把pc的ip地址写入redsocks的配置里面，这样会方便很多。而通过批处理文件获取ip比较麻烦，因为批处理文件对字符串操作还是比较弱，
+所以使用了node来获取ip地址。</p>
+
+<h3>利用freewifi</h3>
+
+<hr />
+
+<p>如果PC和手机不是在同一个局域网内会出现NAT映射之类的问题导致手机转发过去的包PC无法收到。所以为了让PC和手机在同一个局域网，我利用了<code>freewifi</code>。
+手机能连上<code>freewifi</code>这是毫无疑问的，但PC要连上freewif就需要多一张无线网卡。同时，当PC出现了两张网卡的时候，
+网络会出现问题的。因为PC发出去的数据包不知道走那个网卡出去。</p>
+
+<p>解决方法是配置route表。</p>
+
+<pre><code>```
+route delete 0.0.0.0
+route add 0.0.0.0 mask 0.0.0.0 %freewifi_gate%
+route add 10.0.0.0 mask 255.0.0.0 %inter_gate%
+route add 192.0.0.0 mask 255.0.0.0 %inter_gate%
+route add 172.0.0.0 mask 255.0.0.0 %inter_gate%
+route add 119.0.0.0 mask 255.0.0.0 %inter_gate%
+```
+</code></pre>
+
+<p>以上代码实现的是，让内网的ip都走连接都走PC原本的网卡，其他连接都走freewifi. 这样就能兼容两张网卡的使用了.</p>
+
+<p>虽然以上代码看起来很简单，但是因为公司网络比较复杂，这里我还是用了nodejs来完成上述的设置.</p>
+
+<h3>最后串起来</h3>
+
+<hr />
+
+<p>最后串起来的流程应该是这样的:
+1. 运行<code>network.bat</code>. network.bat会调用nodejs，把PC上的两张网卡兼容了。
+2. 运行<code>run.bat</code> 。这里会先调用nodejs，把ip地址拿到，生成redsocks配置文件传送到手机上,然后脚本配置<code>iptables</code>和启动<code>resocks</code>进程。 (虽然是一键，但是流程还蛮多的~)
+3. 记得把手机通过usb连上PC上，还要打开pc上的fiddler，还要打开fiddler的远程代理呀(这个大家都会的就不说了)。</p>
+
+<p>当不需要代理的时候运行<code>stop.bat</code>清空<code>iptables</code>的规则即可。</p>
+
+<h2>依赖</h2>
+
+<hr />
+
+<ol>
+<li>手机必须root了，否则没有权限改iptables</li>
+<li>PC上有安装nodejs和fiddler.</li>
+<li>要有一张无线网卡.</li>
+</ol>
+
+
+<h2>说明下</h2>
+
+<hr />
+
+<p>因为安卓手机型号太多，不一定每个型号都测过，如果有问题欢迎联系我.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[tap]]></title>
+    <link href="http://tedzhou.github.com/blog/2012/12/22/tap/"/>
+    <updated>2012-12-22T15:11:00+08:00</updated>
+    <id>http://tedzhou.github.com/blog/2012/12/22/tap</id>
+    <content type="html"><![CDATA[<h1>开发touch遇到的坑之一:android下浏览器tap无反应</h1>
+
+<p>第一次发touch版本就遇到各种问题，这是第一个问题：android 2。3的机器上， <code>a标签</code>上<code>delegate</code>了个<code>tap</code>事件，点击后<code>a标签</code>高亮了，却<em>有时候</em>没有触发<code>tap</code>。</p>
+
+<p>遇到这个问题的时候我第一反应就是要换个底层库，因为我们用的是自己写的库，明显是最让人不放心的。但问题是换了<code>zetpo</code>之后还是没有解决这个问题，这时候就有点凌乱了。因为要赶着上活动，接着就各种风声鹤唳地想办法，最后也不知道是怎么定下来的:</p>
+
+<pre><code>用`touchstart`事件代替`tap`，然后把字体改大些就稍微好点了，*多数情况*下点击`a标签`都会有响应了。
+</code></pre>
+
+<p>虽然版本发了，但是<code>touchstart</code>事件带来其他副作用，例如太容易误操作了。所以还是要研究个彻底。</p>
+
+<hr />
+
+<h2>结论</h2>
+
+<p>考虑到这些研究比较白痴，无非就是一些排列组合，所以直接给出结论:</p>
+
+<ol>
+<li>可点击区域小的时候， <code>touch</code> 不一定会触发， 但<code>click</code> 一定会触发， <code>href</code> 也会触发。(a标签高亮了是因为href)。</li>
+<li>事件触发顺序是<code>touch</code> -> <code>click</code> -><code>href</code></li>
+<li>&#8220;命中率&#8221;来说， <code>href</code>==<code>click</code> > <code>touchstart</code> > <code>"tap"</code></li>
+</ol>
+
+
+<p><em>虽然tap在android 2。3下命中比较低， 但由于tap还是会比click响应要快， 所以多数情况下还是采用增大可点击区域使用tap事件会更好。</em></p>
+
+<hr />
+
+<h2><a href="http://tedzhou.github.com/demo/tap.html">Demo</a></h2>
+
+<ol>
+<li>第一部分测试字体大小delegate <code>tap/touchstart</code> 和<code>href</code> 的命中率， 结论是字体小的<code>tap</code> 命中率非常低， <code>href</code>全命中。 换用<code>touchstart</code> ， <code>touchstart</code> 的成功率比<code>tap</code> 的高， 但也比<code>href</code> 要低，不是全中。</li>
+<li>第二部分测试<code>href</code> 对delegate <code>tap/touchstart</code> 命中有没有影响， 结论<code>tap</code> 和<code>touchstart</code> 还是命中率非常低。</li>
+<li>第三部分测试加上<code>padding</code> 后增大可点击区域命中率有无提升，结论是有的。</li>
+<li>第四部分测试不用delegate， <code>touchstart</code> 和<code>href</code> 的命中率， 结论是和第一部分测试没啥区别。</li>
+<li>第五部分测试<code>onclick</code> 和<code>href</code> 的命中率， 结论是两者都是全中的。</li>
+<li>第六部分测试<code>onclick</code> 和<code>touchstart</code> 的命中率， 结论是<code>onclick</code> 还是全中， <code>touchstart</code> 字体小的还是比较低。</li>
+<li>注意的是， 以上六个测试都符合事件触发顺序是touch->click->href。</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>

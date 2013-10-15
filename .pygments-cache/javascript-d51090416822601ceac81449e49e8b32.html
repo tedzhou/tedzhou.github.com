@@ -1,0 +1,31 @@
+<div class="highlight"><pre>	<span class="kd">var</span> <span class="nx">ghostClick</span> <span class="o">=</span> <span class="p">{</span>
+		<span class="nx">_coordinates</span><span class="o">:</span><span class="p">[],</span>
+		<span class="nx">mark</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span> <span class="p">,</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="p">){</span>
+			<span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span><span class="nx">y</span><span class="p">,</span> <span class="nx">el</span><span class="o">:</span><span class="nx">el</span><span class="p">});</span>
+			<span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+				<span class="nx">ghostClick</span><span class="p">.</span><span class="nx">unmark</span><span class="p">();</span>
+				<span class="c1">// 这1000ms是经验值</span>
+			<span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+		<span class="p">},</span>
+		<span class="nx">unmark</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span>
+			<span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+		<span class="p">},</span>
+		<span class="nx">onMouseDown</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nx">ghostClick</span><span class="p">.</span><span class="nx">_coordinates</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coordinate</span><span class="p">){</span>
+				<span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">x</span><span class="p">;</span>
+				<span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+				<span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">coordinate</span><span class="p">.</span><span class="nx">el</span><span class="p">;</span>
+				<span class="c1">// 坐标一样，target却不一样，你妹还不是穿透了？</span>
+				<span class="k">if</span> <span class="p">(</span><span class="nx">el</span> <span class="o">!=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientX</span> <span class="o">-</span> <span class="nx">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">25</span> <span class="o">&amp;&amp;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientY</span> <span class="o">-</span> <span class="nx">y</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">)</span> <span class="p">{</span>
+					<span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+					<span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+				<span class="p">}</span>
+			<span class="p">});</span>
+		<span class="p">}</span>
+	<span class="p">};</span>
+
+	<span class="c1">// 事件触发顺序 mousedown-&gt;focus-&gt;mouseup-&gt;click</span>
+	<span class="c1">// 如果不想focus，那就mousedown吧</span>
+	<span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="nx">ghostClick</span><span class="p">.</span><span class="nx">onMouseDown</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</pre>
+</div>
